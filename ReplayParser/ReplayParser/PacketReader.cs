@@ -14,11 +14,9 @@ namespace ReplayParser
         private long ReadLength;
         private BinaryReader replayFile;
         public bool loaded;
-        private string key;
 
-        public PacketReader(ReplayStream reader, string key)
+        public PacketReader(ReplayStream reader)
         {
-            this.key = key;
             loaded = Load(reader);
         }
 
@@ -49,8 +47,6 @@ namespace ReplayParser
         {
             if (File.Exists(file))
                 File.Delete(file);
-
-            File.AppendAllText(file, key + Environment.NewLine);
 
             foreach (var p in PacketBuffer)
             {

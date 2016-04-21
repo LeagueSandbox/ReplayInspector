@@ -15,16 +15,17 @@ namespace ReplayParser
             if (!args[0].ToLower().EndsWith(".lrf"))
                 return;
 
+            // this is overkill lmao
             var file = ReplayFile.Open(args[0]);
 
             if (file == null)
                 return;
 
-            var reader = new PacketReader(file.GetReplayStream(), file.encryptionKey);
+            var reader = new PacketReader(file.GetReplayStream());
             if (!reader.loaded)
                 return;
 
-            reader.writeToFile(args[1]);
+            new PacketWriter(reader.getPackets(), file).writeJson(args[1]);
         }
     }
 }
