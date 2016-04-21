@@ -45,7 +45,7 @@ def process_match_page(response):
     except:
         if "<tr><th>POV</th><td>Spectator</tr>" not in source:
             with open("champion_error_%i.txt" % int(random.random() * 10000000000000000000000), "a") as f:
-                f.write(source)
+                f.write(source.encode("utf-8"))
             return
         champion = "Spectator"
 
@@ -53,7 +53,7 @@ def process_match_page(response):
         replay_id = re.search(REPLAY_ID_PATTERN, source).group(1)
     except:
         with open("replay_error_%i.txt" % int(random.random() * 10000000000000000000000), "a") as f:
-            f.write(source)
+            f.write(source.encode("utf-8"))
         return
 
     download_replay(champion, replay_id)
