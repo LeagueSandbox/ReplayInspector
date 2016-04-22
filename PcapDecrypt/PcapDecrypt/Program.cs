@@ -1,5 +1,7 @@
 ﻿using BlowFishCS;
+using Newtonsoft.Json;
 using PacketDotNet;
+using PcapDecrypt.Json;
 using SharpPcap;
 using SharpPcap.LibPcap;
 using System;
@@ -15,7 +17,7 @@ namespace PcapDecrypt
     unsafe class Program
     {
         private static BlowFish* _blowfish;
-        private static Dictionary<int, byte[]> buff = new Dictionary<int, byte[]>();
+        private static Dictionary<int, Dictionary<int, byte[]>> fragmentBuffer = new Dictionary<int, Dictionary<int, byte[]>>();
         private static List<string> toWrite = new List<string>();
 
         static void Main(string[] args)
@@ -38,13 +40,13 @@ namespace PcapDecrypt
                 f.Capture();
                 f.Close();
             }
-            else if (args[0].ToLower().EndsWith(".txt"))
+            else if (args[0].ToLower().EndsWith(".json"))
             {
-                if (args.Length < 1)
-                    return;
+                var json = File.ReadAllText(args[0]);
+                var replay = JsonConvert.DeserializeObject<Replay>(json);
 
-                var packets = loadPackets(args[0]);
-                parsePackets(packets);
+                initBlowfish(replay.encryptionKey);
+                parsePackets(replay.packets);
             }
             else
             {
@@ -53,25 +55,29 @@ namespace PcapDecrypt
                 return;
             }
 
+            if (File.Exists("decrypted.txt"))
+                File.Delete("decrypted.txt");
+
             File.AppendAllLines("decrypted.txt", toWrite);
             Console.WriteLine("done");
             Console.ReadLine();
         }
 
-        private static void parsePackets(List<byte[]> packets)
+        private static void parsePackets(List<Json.Packet> packets)
         {
             foreach (var packet in packets)
             {
-                //File.AppendAllText("wireshark.txt", "000000 " + BitConverter.ToString(packet).Replace('-', ' ') + Environment.NewLine);
+                //File.AppendAllText("wireshark.txt", "000000 " + BitConverter.ToString(fakeUDPHeader(packet.Bytes, packet.Length).ToArray()).Replace('-', ' ') + Environment.NewLine);
                 if (packet.Length < 45)
                     continue;
-                try
+               // try
                 {
                     var eventArgs = new CaptureEventArgs(new RawCapture(LinkLayers.Null, null, null), null);
-                    eventArgs.Packet.Data = packet;
+                    eventArgs.Packet.Data = fakeUDPHeader(packet.Bytes, packet.Length).ToArray();
+                    eventArgs.Packet.Timeval = new PosixTimeval(packet.Time);
                     F_OnPacketArrival(null, eventArgs);
                 }
-                catch { }
+               // catch { }
             }
         }
 
@@ -85,35 +91,7 @@ namespace PcapDecrypt
                 _blowfish = BlowFishCreate(s, new IntPtr(16));
         }
 
-        private static List<byte[]> loadPackets(string v)
-        {
-            if (!File.Exists(v))
-                return new List<byte[]>();
-
-            var lines = File.ReadAllLines(v).ToList();
-            if (lines.Count < 2)
-                return new List<byte[]>();
-
-            var key = lines[0];
-            lines.RemoveAt(0);
-            initBlowfish(key);
-
-            var ret = new List<byte[]>();
-            foreach (var line in lines)
-            {
-                var temp = new List<byte>();
-                var bytes = line.Split(' ');
-                foreach (var b in bytes)
-                    if (!string.IsNullOrWhiteSpace(b))
-                        temp.Add(byte.Parse(b, NumberStyles.HexNumber));
-
-                ret.Add(fakeUDPHeader(temp, temp.Count).ToArray());
-            }
-
-            return ret;
-        }
-
-        private static List<byte> fakeUDPHeader(List<byte> temp, int count)
+        private static List<byte> fakeUDPHeader(byte[] temp, int count)
         {
             var totalLen = BitConverter.GetBytes((ushort)(count + 28));
             var payloadLen = BitConverter.GetBytes((ushort)count + 8);
@@ -155,14 +133,14 @@ namespace PcapDecrypt
                 case EnetOpCodes.THROTTLE_CONFIGURE:
                     return;
                 case EnetOpCodes.SEND_RELIABLE:
-                    handleReliable(reader, sourcePort > destPort);
+                    handleReliable(reader, e.Packet.Timeval.Miliseconds, sourcePort > destPort);
                     return;
                 case EnetOpCodes.SEND_FRAGMENT:
-                    handleFragment(reader, sourcePort > destPort);
+                    handleFragment(reader, e.Packet.Timeval.Miliseconds, sourcePort > destPort);
                     return;
             }
             logLine("Unknown enet command " + opCode + " " + BitConverter.ToString(new byte[] { (byte)opCode }));
-            printPacket(e.Packet.Data, sourcePort > destPort);
+            printPacket(e.Packet.Data, e.Packet.Timeval.Miliseconds, sourcePort > destPort);
         }
 
         private static byte[] decrypt(byte[] packet)
@@ -175,9 +153,11 @@ namespace PcapDecrypt
             return temp;
         }
 
-        private static void printPacket(byte[] packet, bool C2S, bool addSeparator = true)
+        private static void printPacket(byte[] packet, float time, bool C2S, bool addSeparator = true)
         {
-            var tt = C2S ? "C2S: " + (PacketCmdS2C)(packet[0]) : "S2C: " + (PacketCmdS2C)(packet[0]);
+            var tSent = TimeSpan.FromMilliseconds(time);
+            var tt = tSent.ToString("mm\\:ss\\.ffff");
+            tt += C2S ? " C2S: " + (PacketCmdS2C)(packet[0]) : " S2C: " + (PacketCmdS2C)(packet[0]);
             tt += " Length:" + packet.Length + Environment.NewLine;
             int i = 0;
             if (packet.Length > 15)
@@ -227,35 +207,40 @@ namespace PcapDecrypt
 
         }
 
-        private static void handleReliable(BinaryReader reader, bool C2S)
+        private static void handleReliable(BinaryReader reader, float time, bool C2S)
         {
             var len = reader.ReadUInt16(true);
-            var packet = reader.ReadBytes(len);
+            //if (reader.BaseStream.Length - reader.BaseStream.Position < len)
+             //   return;
 
+            var packet = reader.ReadBytes(len);
             if (packet.Length < 1)
                 return;
 
             var decrypted = decrypt(packet);
-            printPacket(decrypted, C2S, false);
+            printPacket(decrypted, time, C2S, false);
 
             if (decrypted[0] == 0xFF)
             {
                 logLine(Environment.NewLine + "===Printing batch===");
                 try
                 {
-                    decodeBatch(decrypted, C2S);
+                    decodeBatch(decrypted, time, C2S);
                 }
-                catch { }
+                catch
+                {
+                    logLine("Batch parsing threw an exception.");
+                }
                 logLine("======================end batch==========================" + Environment.NewLine);
             }
         }
 
-        private static void handleFragment(BinaryReader reader, bool C2S)
+        private static void handleFragment(BinaryReader reader, float time, bool C2S)
         {
-            reader.ReadUInt16(); // Fragment start number
+            var fragmentGroup = reader.ReadUInt16(); // Fragment start number
             var len = reader.ReadUInt16(true);
 
-            if (len < 1)
+            if (reader.BaseStream.Length - reader.BaseStream.Position < len + 16)
                 return;
 
             var totalFragments = reader.ReadInt32(true);
@@ -264,6 +249,10 @@ namespace PcapDecrypt
             reader.ReadInt32(); // Offset
             var payload = reader.ReadBytes(len);
 
+            if (!fragmentBuffer.ContainsKey(fragmentGroup))
+                fragmentBuffer.Add(fragmentGroup, new Dictionary<int, byte[]>());
+
+            var buff = fragmentBuffer[fragmentGroup];
             if (buff.ContainsKey(currentFragment))
                 buff[currentFragment] = payload;
             else
@@ -277,17 +266,17 @@ namespace PcapDecrypt
                     packet.AddRange(t.Value);
 
                 if (totalLen != packet.Count)
-                    logLine("Fragment's fishy. " + totalLen + "!=" + packet.Count);
+                    return;// logLine("Fragment's fishy. " + totalLen + "!=" + packet.Count);
 
                 var decrypted = decrypt(packet.ToArray());
-                printPacket(decrypted, C2S);
-                buff.Clear();
+                printPacket(decrypted, time, C2S);
+                fragmentBuffer.Remove(fragmentGroup);
             }
         }
 
         //FE [ 00 00 00 00 00 ] 07 ...
         //0x107 [NET ID] ... 
-        private static void decodeBatch(byte[] decrypted, bool C2S)
+        private static void decodeBatch(byte[] decrypted, float time, bool C2S)
         {
             var reader = new BinaryReader(new MemoryStream(decrypted));
             reader.ReadByte();
@@ -305,7 +294,7 @@ namespace PcapDecrypt
                 firstPacket.AddRange(reader.ReadBytes(size - 5));
 
             logLine("Packet 1, Length " + size);
-            printPacket(firstPacket.ToArray(), C2S, false);
+            printPacket(firstPacket.ToArray(), time, C2S, false);
 
             for (int i = 2; i < packetCount + 1; i++)
             {
@@ -340,7 +329,7 @@ namespace PcapDecrypt
                 else
                     buffer.AddRange(BitConverter.GetBytes(netId).Reverse());
                 buffer.AddRange(reader.ReadBytes(size));
-                printPacket(buffer.ToArray(), C2S, false);
+                printPacket(buffer.ToArray(), time, C2S, false);
 
                 opCode = command;
             }

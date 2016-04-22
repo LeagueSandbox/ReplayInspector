@@ -10,7 +10,7 @@ namespace ReplayParser
     {
         public static void Main(string[] args)
         {
-            if (args.Length < 2)
+            if (args.Length < 1)
                 return;
             if (!args[0].ToLower().EndsWith(".lrf"))
                 return;
@@ -25,7 +25,7 @@ namespace ReplayParser
             if (!reader.loaded)
                 return;
 
-            new PacketWriter(reader.getPackets(), file).writeJson(args[1]);
+            new PacketWriter(reader.getPackets(), file).writeJson(args[0]);
         }
     }
 }

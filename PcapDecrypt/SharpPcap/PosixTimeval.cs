@@ -46,6 +46,12 @@ namespace SharpPcap
             set;
         }
 
+        virtual public float Miliseconds
+        {
+            get;
+            set;
+        }
+
         /// <summary> The timeval as a DateTime in Utc </summary>
         virtual public System.DateTime Date
         {
@@ -239,6 +245,11 @@ namespace SharpPcap
         {
             this.Seconds = Seconds;
             this.MicroSeconds = MicroSeconds;
+        }
+
+        public PosixTimeval(float miliseconds)
+        {
+            this.Miliseconds = miliseconds;
         }
 
         /// <summary>

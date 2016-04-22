@@ -55,13 +55,9 @@ namespace ReplayParser
             }
         }
 
-        public List<byte[]> getPackets()
+        public List<Packet> getPackets()
         {
-            var ret = new List<byte[]>();
-            foreach (var packet in PacketBuffer)
-                ret.Add(packet.Bytes);
-
-            return ret;
+            return PacketBuffer;
         }
     }
 }

@@ -15,7 +15,7 @@ namespace BlowFishCS
 {
     public unsafe class BlowFishCS
     {
-        private const string LIB = "libintlib.dll";
+        private const string LIB = "lib/libintlib.dll";
         [DllImport(LIB)]
         public static extern BlowFish* BlowFishCreate(byte* ucKey, IntPtr n);
         [DllImport(LIB)]
