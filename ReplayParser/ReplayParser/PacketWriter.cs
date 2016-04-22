@@ -29,12 +29,14 @@ namespace ReplayParser
                 File.Delete(file);
 
             var buffer = new Dictionary<string, object>();
-            var players = new Dictionary<string, object>();
+            var players = new List<Dictionary<string, object>>();
             foreach (var player in Replay.players)
             {
-                players.Add("name", player.summoner);
-                players.Add("champion", player.champion);
-                players.Add("team", player.team);
+                var temp = new Dictionary<string, object>();
+                temp.Add("name", player.summoner);
+                temp.Add("champion", player.champion);
+                temp.Add("team", player.team);
+                players.Add(temp);
             }
             buffer.Add("replayName", Replay.name);
             buffer.Add("players", players);
