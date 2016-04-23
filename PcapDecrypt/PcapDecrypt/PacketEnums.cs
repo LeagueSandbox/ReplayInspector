@@ -20,6 +20,7 @@ namespace PcapDecrypt
         SEND_UNSEQUENCED = 0x09,
         BANDWIDTH_LIMIT = 0x0A,
         THROTTLE_CONFIGURE = 0x0B,
+        COUNT = 0x0C
     }
     public enum PacketCmdS2C : byte
     {

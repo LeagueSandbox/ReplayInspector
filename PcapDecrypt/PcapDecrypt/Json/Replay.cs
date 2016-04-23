@@ -9,6 +9,7 @@ namespace PcapDecrypt.Json
    public class Replay
     {
         public string replayName { get; set; }
+        public int accountId { get; set; }
         public List<Player> players { get; set; }
         public string serverAddress { get; set; }
         public int serverPort { get; set; }

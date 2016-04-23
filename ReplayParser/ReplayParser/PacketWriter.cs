@@ -39,6 +39,7 @@ namespace ReplayParser
                 players.Add(temp);
             }
             buffer.Add("replayName", Replay.name);
+            buffer.Add("accountId", Replay.accountID);
             buffer.Add("players", players);
             buffer.Add("serverAddress", Replay.serverAddress);
             buffer.Add("serverPort", Replay.serverPort);
