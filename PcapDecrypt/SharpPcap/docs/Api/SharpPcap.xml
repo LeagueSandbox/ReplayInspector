@@ -514,7 +514,7 @@
         <member name="P:SharpPcap.AirPcap.AirPcapDeviceList.Item(System.String)">
             <param name="Name">The name or description of the pcap interface to get.</param>
         </member>
-        <!-- Badly formed XML comment ignored for member "M:SharpPcap.AirPcap.AirPcapDeviceList.GetAirPcapDevices" -->
+        <!-- El comentario XML con formato incorrecto se ha omitido para el miembro "M:SharpPcap.AirPcap.AirPcapDeviceList.GetAirPcapDevices" -->
         <member name="T:SharpPcap.AirPcap.AirPcapDeviceTimestamp">
             <summary>
             Defines the internal AirPcap device timestamp
@@ -3607,7 +3607,7 @@
             Represents a strongly typed, read-only list of PcapDevices.
             </summary>
         </member>
-        <!-- Badly formed XML comment ignored for member "M:SharpPcap.WinPcap.WinPcapDeviceList.Devices(System.Net.IPAddress,System.Int32,SharpPcap.WinPcap.RemoteAuthentication)" -->
+        <!-- El comentario XML con formato incorrecto se ha omitido para el miembro "M:SharpPcap.WinPcap.WinPcapDeviceList.Devices(System.Net.IPAddress,System.Int32,SharpPcap.WinPcap.RemoteAuthentication)" -->
         <member name="M:SharpPcap.WinPcap.WinPcapDeviceList.GetDevices">
             <summary>
             Retrieve the local devices

@@ -11,6 +11,9 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using static BlowFishCS.BlowFishCS;
+using System.Windows.Forms;
+using System.Runtime.Remoting;
+using PcapDecrypt.Packets;
 
 namespace PcapDecrypt
 {
@@ -20,12 +23,18 @@ namespace PcapDecrypt
         private static Dictionary<int, Dictionary<int, byte[]>> fragmentBuffer = new Dictionary<int, Dictionary<int, byte[]>>();
         private static List<string> toWrite = new List<string>();
 
+        public static List<Packets.Packets> PacketList = new List<Packets.Packets>();
+        public static List<Packets.Packets> BatchPacketList = new List<Packets.Packets>();
+        public static bool filtering = false;
+        public static byte filter = 0xC9;
+        public static bool printToFile = false;
+
         static void Main(string[] args)
         {
             if (args.Length < 1)
                 return;
 
-            Console.Write("running...");
+            Console.WriteLine("Running...");
 
             if (args[0].ToLower().EndsWith(".pcap"))
             {
@@ -46,20 +55,41 @@ namespace PcapDecrypt
                 var replay = JsonConvert.DeserializeObject<Replay>(json);
 
                 initBlowfish(replay.encryptionKey);
+                Console.WriteLine("Parsing packets, please wait...");
+                var watch = System.Diagnostics.Stopwatch.StartNew();
                 parsePackets(replay.packets);
+                watch.Stop();
+                var elapsed = watch.Elapsed;
+                Console.WriteLine("Packets parsed. ("+elapsed+" ms)");
             }
             else
             {
-                Console.WriteLine("unknown input file.");
+                Console.WriteLine("Unknown input file.");
                 Console.ReadLine();
                 return;
             }
+            if (args.Length > 1)
+            {
+                if (args[1].ToLower() == "-printtofile")
+                {
+                    printToFile = true;
+                }
+            }
+
+            Console.WriteLine("Loading GUI, please wait...");
+            var watch2 = System.Diagnostics.Stopwatch.StartNew();
+            Application.EnableVisualStyles();
+            Application.SetCompatibleTextRenderingDefault(false);
+            Application.Run(new MainWindow());
+            watch2.Stop();
+            var elapsed2 = watch2.Elapsed;
+            Console.WriteLine("GUI loaded. (" + elapsed2 + " ms)");
 
             if (File.Exists("decrypted.txt"))
                 File.Delete("decrypted.txt");
 
             File.AppendAllLines("decrypted.txt", toWrite);
-            Console.WriteLine("done");
+            Console.WriteLine("Done.");
             Console.ReadLine();
         }
 
@@ -107,6 +137,8 @@ namespace PcapDecrypt
 
         private static void F_OnPacketArrival(object sender, CaptureEventArgs e)
         {
+            //Console.Clear();
+            //Console.WriteLine("Packets parsed: " + PacketList.Count);
             var reader = new BinaryReader(new MemoryStream(e.Packet.Data));
             reader.ReadBytes(20); // IPv4 data
 
@@ -141,6 +173,15 @@ namespace PcapDecrypt
             }
             logLine("Unknown enet command " + opCode + " " + BitConverter.ToString(new byte[] { (byte)opCode }));
             printPacket(e.Packet.Data, e.Packet.Timeval.Miliseconds, sourcePort > destPort);
+
+            if (!filtering)
+            {
+                PacketList.Add(CreatePacket(e.Packet.Data));
+            }
+            if (filtering && e.Packet.Data[0] == filter)
+            {
+                PacketList.Add(CreatePacket(e.Packet.Data));
+            }
         }
 
         private static byte[] decrypt(byte[] packet)
@@ -155,63 +196,65 @@ namespace PcapDecrypt
 
         private static void printPacket(byte[] packet, float time, bool C2S, bool addSeparator = true)
         {
-            var tSent = TimeSpan.FromMilliseconds(time);
-            var tt = tSent.ToString("mm\\:ss\\.ffff");
-            tt += C2S ? " C2S: " + (PacketCmdS2C)(packet[0]) : " S2C: " + (PacketCmdS2C)(packet[0]);
-            tt += " Length:" + packet.Length + Environment.NewLine;
-            int i = 0;
-            if (packet.Length > 15)
+            if (printToFile)
             {
-                for (i = 16; i <= packet.Length; i += 16)
+                var tSent = TimeSpan.FromMilliseconds(time);
+                var tt = tSent.ToString("mm\\:ss\\.ffff");
+                tt += C2S ? " C2S: " + (PacketCmdS2C)(packet[0]) : " S2C: " + (PacketCmdS2C)(packet[0]);
+                tt += " Length:" + packet.Length + Environment.NewLine;
+                int i = 0;
+                if (packet.Length > 15)
                 {
-                    for (var j = 16; j > 0; j--)
-                        tt += packet[i - j].ToString("X2") + " ";
-                    for (var j = 16; j > 0; j--)
+                    for (i = 16; i <= packet.Length; i += 16)
                     {
-                        if (packet[i - j] >= 32 && packet[i - j] <= 126)
-                            tt += Encoding.Default.GetString(new byte[] { packet[i - j] });
+                        for (var j = 16; j > 0; j--)
+                            tt += packet[i - j].ToString("X2") + " ";
+                        for (var j = 16; j > 0; j--)
+                        {
+                            if (packet[i - j] >= 32 && packet[i - j] <= 126)
+                                tt += Encoding.Default.GetString(new byte[] { packet[i - j] });
+                            else
+                                tt += ".";
+                        }
+                        tt += Environment.NewLine;
+                    }
+                }
+
+                var temp = i;
+                if (temp != packet.Length + 16)
+                {
+                    if (temp > 15)
+                        temp -= 16;
+                    var ssss = packet.Length - temp;
+                    while (temp < packet.Length)
+                    {
+                        tt += packet[temp].ToString("X2") + " ";
+                        temp++;
+                    }
+                    for (var j = temp % 16; j < 16; j++)
+                        tt += "   ";
+
+                    temp = i > 15 ? i - 16 : i;
+                    for (var j = 0; j < ssss; j++)
+                    {
+                        if (packet[temp + j] >= 32 && packet[temp + j] <= 126)
+                            tt += Encoding.Default.GetString(new byte[] { packet[temp + j] });
                         else
                             tt += ".";
                     }
-                    tt += Environment.NewLine;
                 }
+                logLine(tt + Environment.NewLine);
+
+                if (addSeparator)
+                    logLine("----------------------------------------------------------------------------");
             }
-
-            var temp = i;
-            if (temp != packet.Length + 16)
-            {
-                if (temp > 15)
-                    temp -= 16;
-                var ssss = packet.Length - temp;
-                while (temp < packet.Length)
-                {
-                    tt += packet[temp].ToString("X2") + " ";
-                    temp++;
-                }
-                for (var j = temp % 16; j < 16; j++)
-                    tt += "   ";
-
-                temp = i > 15 ? i - 16 : i;
-                for (var j = 0; j < ssss; j++)
-                {
-                    if (packet[temp + j] >= 32 && packet[temp + j] <= 126)
-                        tt += Encoding.Default.GetString(new byte[] { packet[temp + j] });
-                    else
-                        tt += ".";
-                }
-            }
-            logLine(tt + Environment.NewLine);
-
-            if (addSeparator)
-                logLine("----------------------------------------------------------------------------");
-
         }
 
         private static void handleReliable(BinaryReader reader, float time, bool C2S)
         {
             var len = reader.ReadUInt16(true);
             //if (reader.BaseStream.Length - reader.BaseStream.Position < len)
-             //   return;
+            //   return;
 
             var packet = reader.ReadBytes(len);
             if (packet.Length < 1)
@@ -219,6 +262,20 @@ namespace PcapDecrypt
 
             var decrypted = decrypt(packet);
             printPacket(decrypted, time, C2S, false);
+
+            /*PacketCmdS2C cmd = (PacketCmdS2C)decrypted[0];
+            string cmdString = "Packets." + cmd.ToString();
+            //Console.Write(cmdString);
+            Packets.Packets caca = GetInstance(cmdString);
+            */
+            if (!filtering)
+            {
+                PacketList.Add(CreatePacket(decrypted));
+            }
+            if (filtering && (decrypted[0] == filter || decrypted[0] == 0xFF))
+            {
+                PacketList.Add(CreatePacket(decrypted));
+            }
 
             if (decrypted[0] == 0xFF)
             {
@@ -233,6 +290,157 @@ namespace PcapDecrypt
                 }
                 logLine("======================end batch==========================" + Environment.NewLine);
             }
+        }
+
+        public static Packets.Packets CreatePacket(byte[] bytes)
+        {
+            switch ((PacketCmdS2C)bytes[0]) // This looks horrible, don't hate me please :3
+            {
+                case PacketCmdS2C.PKT_S2C_AddBuff:
+                    return new PKT_S2C_AddBuff(bytes);
+                case PacketCmdS2C.PKT_S2C_Announce:
+                    return new PKT_S2C_Announce(bytes);
+                case PacketCmdS2C.PKT_S2C_AttentionPing:
+                    return new PKT_S2C_AttentionPing(bytes);
+                case PacketCmdS2C.PKT_S2C_Batch:
+                    //return new PKT_S2C_Batch(bytes);
+                case PacketCmdS2C.PKT_S2C_BeginAutoAttack:
+                    return new PKT_S2C_BeginAutoAttack(bytes);
+                case PacketCmdS2C.PKT_S2C_BuyItemAns:
+                    return new PKT_S2C_BuyItemAns(bytes);
+                case PacketCmdS2C.PKT_S2C_CastSpellAns:
+                    return new PKT_S2C_CastSpellAns(bytes);
+                case PacketCmdS2C.PKT_S2C_ChampionDie:
+                    return new PKT_S2C_ChampionDie(bytes);
+                case PacketCmdS2C.PKT_S2C_ChampionRespawn:
+                    return new PKT_S2C_ChampionRespawn(bytes);
+                case PacketCmdS2C.PKT_S2C_CharStats:
+                    //return new PKT_S2C_CharStats(bytes);
+                case PacketCmdS2C.PKT_S2C_ChatBoxMessage:
+                    return new PKT_C2S_ChatBoxMessage(bytes);
+                case PacketCmdS2C.PKT_S2C_DamageDone:
+                    return new PKT_S2C_DamageDone(bytes);
+                case PacketCmdS2C.PKT_S2C_Dash:
+                    return new PKT_S2C_Dash(bytes);
+                case PacketCmdS2C.PKT_S2C_DebugMessage:
+                    return new PKT_S2C_DebugMessage(bytes);
+                case PacketCmdS2C.PKT_S2C_DeleteObject:
+                    return new PKT_S2C_DeleteObject(bytes);
+                case PacketCmdS2C.PKT_S2C_DestroyProjectile:
+                    return new PKT_S2C_DestroyProjectile(bytes);
+                case PacketCmdS2C.PKT_S2C_EditBuff:
+                    return new PKT_S2C_EditBuff(bytes);
+                case PacketCmdS2C.PKT_S2C_Emotion:
+                    return new PKT_S2C_Emotion(bytes);
+                case PacketCmdS2C.PKT_S2C_EndSpawn:
+                    return new PKT_S2C_EndSpawn(bytes);
+                case PacketCmdS2C.PKT_S2C_Extended:
+                    return new PKT_S2C_Extended(bytes);
+                case PacketCmdS2C.PKT_S2C_FaceDirection:
+                    return new PKT_S2C_FaceDirection(bytes);
+                case PacketCmdS2C.PKT_S2C_FloatingText:
+                    return new PKT_S2C_FloatingText(bytes);
+                case PacketCmdS2C.PKT_S2C_FogUpdate2:
+                    //return new PKT_S2C_FogUpdate2(bytes);
+                case PacketCmdS2C.PKT_S2C_GameEnd:
+                    return new PKT_S2C_GameEnd(bytes);
+                case PacketCmdS2C.PKT_S2C_GameTimer:
+                    return new PKT_S2C_GameTimer(bytes);
+                case PacketCmdS2C.PKT_S2C_GameTimerUpdate:
+                    return new PKT_S2C_GameTimerUpdate(bytes);
+                case PacketCmdS2C.PKT_S2C_HeroSpawn:
+                    return new PKT_S2C_HeroSpawn(bytes);
+                case PacketCmdS2C.PKT_S2C_KeyCheck:
+                    return new PKT_S2C_KeyCheck(bytes);
+                case PacketCmdS2C.PKT_S2C_LeaveVision:
+                    return new PKT_S2C_LeaveVision(bytes);
+                case PacketCmdS2C.PKT_S2C_LevelPropSpawn:
+                    return new PKT_S2C_LevelPropSpawn(bytes);
+                case PacketCmdS2C.PKT_S2C_LevelUp:
+                    return new PKT_S2C_LevelUp(bytes);
+                /*case PacketCmdS2C.PKT_S2C_LoadHero:
+                    return new PKT_S2C_LoadHero(bytes);*/
+                case PacketCmdS2C.PKT_S2C_LoadName:
+                    return new PKT_S2C_LoadName(bytes);
+                case PacketCmdS2C.PKT_S2C_LoadScreenInfo:
+                    return new PKT_S2C_LoadScreenInfo(bytes);
+                case PacketCmdS2C.PKT_S2C_MoveAns:
+                    return new PKT_S2C_MoveAns(bytes);
+                case PacketCmdS2C.PKT_S2C_NextAutoAttack:
+                    return new PKT_S2C_NextAutoAttack(bytes);
+                case PacketCmdS2C.PKT_S2C_NPC_Hide:
+                    //return new PKT_S2C_NPC_Hide(bytes);
+                case PacketCmdS2C.PKT_S2C_ObjectSpawn:
+                    return new PKT_S2C_ObjectSpawn(bytes);
+                case PacketCmdS2C.PKT_S2C_Ping_Load_Info:
+                    return new PKT_S2C_Ping_Load_Info(bytes);
+                case PacketCmdS2C.PKT_S2C_PlayerInfo:
+                    return new PKT_S2C_PlayerInfo(bytes);
+                case PacketCmdS2C.PKT_S2C_QueryStatusAns:
+                    return new PKT_S2C_QueryStatusAns(bytes);
+                case PacketCmdS2C.PKT_S2C_RemoveBuff:
+                    return new PKT_S2C_RemoveBuff(bytes);
+                case PacketCmdS2C.PKT_S2C_RemoveItem:
+                    return new PKT_S2C_RemoveItem(bytes);
+                case PacketCmdS2C.PKT_S2C_SetAnimation:
+                    return new PKT_S2C_SetAnimation(bytes);
+                case PacketCmdS2C.PKT_S2C_SetCooldown:
+                    return new PKT_S2C_SetCooldown(bytes);
+                case PacketCmdS2C.PKT_S2C_SetHealth:
+                    return new PKT_S2C_SetHealth(bytes);
+                case PacketCmdS2C.PKT_S2C_SetTarget:
+                    return new PKT_S2C_SetTarget(bytes);
+                case PacketCmdS2C.PKT_S2C_SetTarget2:
+                    return new PKT_S2C_SetTarget2(bytes);
+                case PacketCmdS2C.PKT_S2C_ShowProjectile:
+                    return new PKT_S2C_ShowProjectile(bytes);
+                case PacketCmdS2C.PKT_S2C_SkillUp:
+                    return new PKT_S2C_SkillUp(bytes);
+                case PacketCmdS2C.PKT_S2C_SpawnParticle:
+                    return new PKT_S2C_SpawnParticle(bytes);
+                case PacketCmdS2C.PKT_S2C_SpawnProjectile:
+                    return new PKT_S2C_SpawnProjectile(bytes);
+                case PacketCmdS2C.PKT_S2C_SpellAnimation:
+                    return new PKT_S2C_SpellAnimation(bytes);
+                case PacketCmdS2C.PKT_S2C_StartGame:
+                    return new PKT_S2C_StartGame(bytes);
+                case PacketCmdS2C.PKT_S2C_StartSpawn:
+                    return new PKT_S2C_StartSpawn(bytes);
+                case PacketCmdS2C.PKT_S2C_StopAutoAttack:
+                    return new PKT_S2C_StopAutoAttack(bytes);
+                case PacketCmdS2C.PKT_S2C_Surrender:
+                    return new PKT_S2C_Surrender(bytes);
+                case PacketCmdS2C.PKT_S2C_SurrenderResult:
+                    return new PKT_S2C_SurrenderResult(bytes);
+                case PacketCmdS2C.PKT_S2C_SwapItems:
+                    return new PKT_S2C_SwapItems(bytes);
+                case PacketCmdS2C.PKT_S2C_SynchVersion:
+                    return new PKT_S2C_SynchVersion(bytes);
+                case PacketCmdS2C.PKT_S2C_TurretSpawn:
+                    return new PKT_S2C_TurretSpawn(bytes);
+                case PacketCmdS2C.PKT_S2C_UpdateModel:
+                    return new PKT_S2C_UpdateModel(bytes);
+                case PacketCmdS2C.PKT_S2C_ViewAns:
+                    return new PKT_S2C_ViewAns(bytes);
+                case PacketCmdS2C.PKT_S2C_World_SendGameNumber:
+                    return new PKT_S2C_World_SendGameNumber(bytes);
+                default:
+                    return new PKT_S2C_Unknown(bytes);
+            }
+        }
+
+        public static Packets.Packets GetInstance(string strFullyQualifiedName)
+        {
+            Type type = Type.GetType(strFullyQualifiedName);
+            if (type != null)
+                return (Packets.Packets)Activator.CreateInstance(type);
+            foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
+            {
+                type = asm.GetType(strFullyQualifiedName);
+                if (type != null)
+                    return (Packets.Packets)Activator.CreateInstance(type);
+            }
+            return null;
         }
 
         private static void handleFragment(BinaryReader reader, float time, bool C2S)
@@ -269,14 +477,22 @@ namespace PcapDecrypt
                     return;// logLine("Fragment's fishy. " + totalLen + "!=" + packet.Count);
 
                 var decrypted = decrypt(packet.ToArray());
+                if (!filtering)
+                {
+                    PacketList.Add(CreatePacket(decrypted));
+                }
+                if (filtering && decrypted[0] == filter)
+                {
+                    PacketList.Add(CreatePacket(decrypted));
+                }
                 printPacket(decrypted, time, C2S);
                 fragmentBuffer.Remove(fragmentGroup);
             }
         }
 
         //FE [ 00 00 00 00 00 ] 07 ...
-        //0x107 [NET ID] ... 
-        private static void decodeBatch(byte[] decrypted, float time, bool C2S)
+        //0x107 [NET ID] ...
+        public static void decodeBatch(byte[] decrypted, float time, bool C2S)
         {
             var reader = new BinaryReader(new MemoryStream(decrypted));
             reader.ReadByte();
@@ -295,6 +511,16 @@ namespace PcapDecrypt
 
             logLine("Packet 1, Length " + size);
             printPacket(firstPacket.ToArray(), time, C2S, false);
+            if (!filtering)
+            {
+                BatchPacketList.Clear();
+                BatchPacketList.Add(CreatePacket(firstPacket.ToArray()));
+            }
+            if (filtering && firstPacket.ToArray()[0] == filter)
+            {
+                BatchPacketList.Clear();
+                BatchPacketList.Add(CreatePacket(firstPacket.ToArray()));
+            }
 
             for (int i = 2; i < packetCount + 1; i++)
             {
@@ -329,6 +555,14 @@ namespace PcapDecrypt
                 else
                     buffer.AddRange(BitConverter.GetBytes(netId).Reverse());
                 buffer.AddRange(reader.ReadBytes(size));
+                if (!filtering)
+                {
+                    BatchPacketList.Add(CreatePacket(buffer.ToArray()));
+                }
+                if (filtering && buffer.ToArray()[0] == filter)
+                {
+                    BatchPacketList.Add(CreatePacket(buffer.ToArray()));
+                }
                 printPacket(buffer.ToArray(), time, C2S, false);
 
                 opCode = command;
@@ -377,6 +611,19 @@ namespace PcapDecrypt
             //System.Diagnostics.Debug.WriteLine(line);
             //Console.WriteLine(line);
             toWrite.Add(line + Environment.NewLine);
+        }
+
+        public uint getHash(string path)
+        {
+            uint hash = 0;
+            uint mask = 0xF0000000;
+            for (var i = 0; i < path.Length; i++)
+            {
+                hash = Char.ToLower(path[i]) + (0x10 * hash);
+                if ((hash & mask) > 0)
+                    hash ^= hash & mask ^ ((hash & mask) >> 24);
+            }
+            return hash;
         }
     }
 }
