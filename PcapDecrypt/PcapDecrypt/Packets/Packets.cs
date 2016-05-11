@@ -981,6 +981,20 @@ namespace PcapDecrypt.Packets
         }
     }
 
+    public class PKT_S2C_Batch : Packets
+    {
+        public PKT_S2C_Batch(byte[] bytes) : base(bytes)
+        {
+            readByte("cmd");
+            readByte("packetCount");
+            readByte("size");
+            readByte("opCode");
+            readUInt("netId");
+            readFill((int)(reader.BaseStream.Length - reader.BaseStream.Position), "packets");
+            close();
+        }
+    }
+
     public class PKT_C2S_BuyItemReq : Packets
     {
         public PKT_C2S_BuyItemReq(byte[] bytes) : base(bytes)

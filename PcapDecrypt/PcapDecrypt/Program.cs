@@ -26,8 +26,9 @@ namespace PcapDecrypt
         public static List<Packets.Packets> PacketList = new List<Packets.Packets>();
         public static List<Packets.Packets> BatchPacketList = new List<Packets.Packets>();
         public static bool filtering = false;
-        public static byte filter = 0xC9;
+        public static byte filter = (byte)PacketCmdS2C.PKT_S2C_ChatBoxMessage;
         public static bool printToFile = false;
+        public static bool toAdd;
 
         static void Main(string[] args)
         {
@@ -77,18 +78,18 @@ namespace PcapDecrypt
             }
 
             Console.WriteLine("Loading GUI, please wait...");
-            var watch2 = System.Diagnostics.Stopwatch.StartNew();
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new MainWindow());
-            watch2.Stop();
-            var elapsed2 = watch2.Elapsed;
-            Console.WriteLine("GUI loaded. (" + elapsed2 + " ms)");
 
-            if (File.Exists("decrypted.txt"))
-                File.Delete("decrypted.txt");
+            if (printToFile)
+            {
+                if (File.Exists("decrypted.txt"))
+                    File.Delete("decrypted.txt");
 
-            File.AppendAllLines("decrypted.txt", toWrite);
+                File.AppendAllLines("decrypted.txt", toWrite);
+                Console.WriteLine("Packet dump saved to decrypted.txt");
+            }
             Console.WriteLine("Done.");
             Console.ReadLine();
         }
@@ -272,7 +273,7 @@ namespace PcapDecrypt
             {
                 PacketList.Add(CreatePacket(decrypted));
             }
-            if (filtering && (decrypted[0] == filter || decrypted[0] == 0xFF))
+            if (filtering && (decrypted[0] == filter))
             {
                 PacketList.Add(CreatePacket(decrypted));
             }
@@ -283,6 +284,10 @@ namespace PcapDecrypt
                 try
                 {
                     decodeBatch(decrypted, time, C2S);
+                    if (toAdd)
+                    {
+                        PacketList.Add(CreatePacket(decrypted));
+                    }
                 }
                 catch
                 {
@@ -303,7 +308,7 @@ namespace PcapDecrypt
                 case PacketCmdS2C.PKT_S2C_AttentionPing:
                     return new PKT_S2C_AttentionPing(bytes);
                 case PacketCmdS2C.PKT_S2C_Batch:
-                    //return new PKT_S2C_Batch(bytes);
+                    return new PKT_S2C_Batch(bytes);
                 case PacketCmdS2C.PKT_S2C_BeginAutoAttack:
                     return new PKT_S2C_BeginAutoAttack(bytes);
                 case PacketCmdS2C.PKT_S2C_BuyItemAns:
@@ -494,6 +499,8 @@ namespace PcapDecrypt
         //0x107 [NET ID] ...
         public static void decodeBatch(byte[] decrypted, float time, bool C2S)
         {
+            toAdd = false;
+
             var reader = new BinaryReader(new MemoryStream(decrypted));
             reader.ReadByte();
 
@@ -513,11 +520,13 @@ namespace PcapDecrypt
             printPacket(firstPacket.ToArray(), time, C2S, false);
             if (!filtering)
             {
+                toAdd = true;
                 BatchPacketList.Clear();
                 BatchPacketList.Add(CreatePacket(firstPacket.ToArray()));
             }
             if (filtering && firstPacket.ToArray()[0] == filter)
             {
+                toAdd = true;
                 BatchPacketList.Clear();
                 BatchPacketList.Add(CreatePacket(firstPacket.ToArray()));
             }
@@ -557,10 +566,12 @@ namespace PcapDecrypt
                 buffer.AddRange(reader.ReadBytes(size));
                 if (!filtering)
                 {
+                    toAdd = true;
                     BatchPacketList.Add(CreatePacket(buffer.ToArray()));
                 }
                 if (filtering && buffer.ToArray()[0] == filter)
                 {
+                    toAdd = true;
                     BatchPacketList.Add(CreatePacket(buffer.ToArray()));
                 }
                 printPacket(buffer.ToArray(), time, C2S, false);
@@ -611,19 +622,6 @@ namespace PcapDecrypt
             //System.Diagnostics.Debug.WriteLine(line);
             //Console.WriteLine(line);
             toWrite.Add(line + Environment.NewLine);
-        }
-
-        public uint getHash(string path)
-        {
-            uint hash = 0;
-            uint mask = 0xF0000000;
-            for (var i = 0; i < path.Length; i++)
-            {
-                hash = Char.ToLower(path[i]) + (0x10 * hash);
-                if ((hash & mask) > 0)
-                    hash ^= hash & mask ^ ((hash & mask) >> 24);
-            }
-            return hash;
         }
     }
 }

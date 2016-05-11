@@ -117,7 +117,7 @@ namespace PcapDecrypt
                 listBox1.Items.Add(PacketSection.Name + ":" + PacketSection.Data);
             }
 
-            if (Program.PacketList[listBox2.SelectedIndex].bytes[0] == 255)
+            if (Program.PacketList[listBox2.SelectedIndex].bytes[0] == 0xFF)
             {
                 Program.decodeBatch(Program.PacketList[listBox2.SelectedIndex].bytes, 0, false);
                 foreach (var Packet in Program.BatchPacketList)
