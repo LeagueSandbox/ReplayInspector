@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace PcapDecrypt.Json
 {
-   public class Replay
+    public class Replay
     {
         public string replayName { get; set; }
         public int accountId { get; set; }

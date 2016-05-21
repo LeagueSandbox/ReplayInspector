@@ -68,6 +68,7 @@
       <DependentUpon>MainWindow.cs</DependentUpon>
     </Compile>
     <Compile Include="PacketEnums.cs" />
+    <Compile Include="Packets\Packet.cs" />
     <Compile Include="Packets\Packets.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

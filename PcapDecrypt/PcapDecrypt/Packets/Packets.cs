@@ -1,287 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Runtime.Serialization.Formatters.Binary;
-using System.Text;
+﻿using System.IO;
 
 namespace PcapDecrypt.Packets
 {
-    public class PacketSection
-    {
-        public string Type;
-        public string Name;
-        public object Data;
-        public byte[] Bytes;
-        public int Length;
-
-        public PacketSection(string type, string name, object data, byte[] bytes)
-        {
-            this.Type = type;
-            this.Name = name;
-            this.Data = data;
-            this.Bytes = bytes;
-            this.Length = bytes.Length;
-            /*if (data is string)
-            {
-                var str = data as string;
-                this.Length = str.Length;
-            }
-            else if (data is byte[])
-            {
-                var arr = data as byte[];
-                this.Length = arr.Length;
-            }
-            else
-            {
-                this.Length = Marshal.SizeOf(data.GetType());
-            }*/
-        }
-
-        static byte[] ObjectToByteArray(object obj)
-        {
-            if (obj == null)
-                return null;
-            BinaryFormatter bf = new BinaryFormatter();
-            using (MemoryStream ms = new MemoryStream())
-            {
-                bf.Serialize(ms, obj);
-                return ms.ToArray();
-            }
-        }
-
-    }
-
-    public class Packets
-    {
-        /*private*/
-        public readonly byte[] bytes;
-        internal BinaryReader reader;
-        internal List<PacketSection> Data = new List<PacketSection>();
-        private Dictionary<PacketCmdS2C, Packets> _packetAnalyzers = new Dictionary<PacketCmdS2C, Packets>();
-
-        public Packets(byte[] bytes)
-        {
-            reader = new BinaryReader(new MemoryStream(bytes));
-            this.bytes = bytes;
-        }
-
-        internal byte readByte(string name)
-        {
-            byte b = 0;
-            try
-            {
-                b = reader.ReadByte();
-            }
-            catch { }
-            byte[] arr = {0};
-            arr[0] = b;
-            Data.Add(new PacketSection("b", name, b, arr));
-            return b;
-        }
-        internal short readShort(string name)
-        {
-            short s = 0;
-            try
-            {
-                int size = sizeof(Int16);
-                byte[] arr = reader.ReadBytes(size);
-                reader.BaseStream.Position -= size;
-
-                s = reader.ReadInt16();
-
-                Data.Add(new PacketSection("s", name, s, arr));
-            }
-            catch {  }
-            //Data.Add(new PacketSection("s", name, s, arr));
-            return s;
-        }
-        internal int readInt(string name)
-        {
-            int i = 0;
-            try
-            {
-                int size = sizeof(Int32);
-                byte[] arr = reader.ReadBytes(size);
-                reader.BaseStream.Position -= size;
-
-                i = reader.ReadInt32();
-
-                Data.Add(new PacketSection("d", name, i, arr));
-            }
-            catch { }
-            //Data.Add(new PacketSection("d", name, i));
-            return i;
-        }
-        internal uint readUInt(string name)
-        {
-            uint ui = 0;
-            try
-            {
-                int size = sizeof(UInt16);
-                byte[] arr = reader.ReadBytes(size);
-                reader.BaseStream.Position -= size;
-
-                ui = reader.ReadUInt32();
-
-                Data.Add(new PacketSection("d+", name, ui, arr));
-            }
-            catch { }
-            //Data.Add(new PacketSection("d+", name, ui));
-            return ui;
-        }
-        internal long readLong(string name)
-        {
-            long l = 0;
-            try
-            {
-                int size = sizeof(Int64);
-                byte[] arr = reader.ReadBytes(size);
-                reader.BaseStream.Position -= size;
-
-                l = reader.ReadInt64();
-
-                Data.Add(new PacketSection("l", name, l, arr));
-            }
-            catch { }
-            //Data.Add(new PacketSection("l", name, l));
-            return l;
-        }
-        internal ulong readULong(string name)
-        {
-            ulong ul = 0;
-            try
-            {
-                int size = sizeof(UInt64);
-                byte[] arr = reader.ReadBytes(size);
-                reader.BaseStream.Position -= size;
-
-                ul = reader.ReadUInt64();
-
-                Data.Add(new PacketSection("ul", name, ul, arr));
-            }
-            catch { }
-            //Data.Add(new PacketSection("l", name, l));
-            return ul;
-        }
-        internal float readFloat(string name)
-        {
-            var f = float.NaN;
-            try
-            {
-                int size = sizeof(float);
-                byte[] arr = reader.ReadBytes(size);
-                reader.BaseStream.Position -= size;
-
-                f = reader.ReadSingle();
-
-                Data.Add(new PacketSection("f", name, f, arr));
-            }
-            catch { }
-            //Data.Add(new PacketSection("f", name, f));
-            return f;
-        }
-        internal byte[] readFill(int len, string name)
-        {
-            byte[] arr = new byte[len];
-            try
-            {
-                arr = reader.ReadBytes(len);
-            }
-            catch { }
-            Data.Add(new PacketSection("fill", name, arr, arr));
-            return arr;
-        }
-        internal string readString(int len, string name)
-        {
-            var buff = new List<byte>(len);
-            try
-            {
-                for (var i = 0; i < len; i++)
-                    buff.Add(reader.ReadByte());
-            }
-            catch { }
-
-            var s = Encoding.Default.GetString(buff.ToArray());
-            Data.Add(new PacketSection("str", name, s, buff.ToArray()));
-            return s;
-        }
-
-        internal string readZeroTerminatedString(string name)
-        {
-            var buff = new List<byte>();
-            try
-            {
-                byte b = 0;
-                do
-                {
-                    b = reader.ReadByte();
-                    buff.Add(b);
-                } while (b != 0);
-            }
-            catch { }
-
-            var s = Encoding.Default.GetString(buff.ToArray());
-            Data.Add(new PacketSection("str", name, s, buff.ToArray()));
-            return s;
-        }
-        internal void close()
-        {
-            if (reader.BaseStream.Position < reader.BaseStream.Length)
-                readFill((int)(reader.BaseStream.Length - reader.BaseStream.Position), "unk(Not defined)");
-            reader.Close();
-        }
-        internal int getBufferLength()
-        {
-            return (int)reader.BaseStream.Length;
-        }
-
-        //lol
-        internal bool isEnterVisionPacket()
-        {
-            if (bytes[0] != (byte)PacketCmdS2C.PKT_S2C_ObjectSpawn)
-                return false;
-
-            bool isEnterVision = true;
-            for (var i = 5; i < 18; i++)
-                if (bytes[i] != 0)
-                    isEnterVision = false;
-            isEnterVision = isEnterVision && BitConverter.ToSingle(bytes.Skip(18).Take(4).ToArray(), 0) == 1.0f;
-            for (var i = 22; i < 35; i++)
-                if (bytes[i] != 0)
-                    isEnterVision = false;
-
-            return isEnterVision;
-        }
-
-        internal bool isHeroSpawn()
-        {
-            if (bytes[0] != (byte)PacketCmdS2C.PKT_S2C_HeroSpawn)
-                return false;
-
-            bool isHeroSpawn = true;
-            for (int i = 5; i < 20; i++)
-                if (bytes[i] != 0)
-                    isHeroSpawn = false;
-            isHeroSpawn = isHeroSpawn && bytes[20] == 0x80;
-            isHeroSpawn = isHeroSpawn && bytes[21] == 0x3F;
-            for (int i = 22; i < 35; i++)
-                if (bytes[i] != 0)
-                    isHeroSpawn = false;
-
-            return isHeroSpawn;
-        }
-        internal bool isTeleport()
-        {
-            if (bytes[0] != (byte)PacketCmdS2C.PKT_S2C_MoveAns)
-                return false;
-
-            return bytes[9] == 0x01 && bytes[10] == 0x00;
-        }
-    }
-
-    public class PKT_S2C_Unknown : Packets
+    public class PKT_S2C_Unknown : Packet
     {
         public PKT_S2C_Unknown(byte[] data) : base(data)
         {
@@ -290,7 +11,7 @@ namespace PcapDecrypt.Packets
         }
     }
 
-    public class PKT_C2S_ClientReady : Packets
+    public class PKT_C2S_ClientReady : Packet
     {
         public PKT_C2S_ClientReady(byte[] data) : base(data)
         {
@@ -301,7 +22,7 @@ namespace PcapDecrypt.Packets
         }
     }
 
-    public class PKT_S2C_SynchVersion : Packets
+    public class PKT_S2C_SynchVersion : Packet
     {
 
         public PKT_S2C_SynchVersion(byte[] bytes) : base(bytes)
@@ -337,7 +58,7 @@ namespace PcapDecrypt.Packets
         }
     }
 
-    public class PKT_S2C_Ping_Load_Info : Packets
+    public class PKT_S2C_Ping_Load_Info : Packet
     {
         public PacketCmdS2C cmd;
         public int netId;
@@ -371,7 +92,7 @@ namespace PcapDecrypt.Packets
         }
     }
 
-    public class PKT_S2C_LoadScreenInfo : Packets
+    public class PKT_S2C_LoadScreenInfo : Packet
     {
         public PKT_S2C_LoadScreenInfo(byte[] bytes) : base(bytes)
         {
@@ -395,7 +116,7 @@ namespace PcapDecrypt.Packets
         }
     }
 
-    public class PKT_S2C_KeyCheck : Packets
+    public class PKT_S2C_KeyCheck : Packet
     {
         public PKT_S2C_KeyCheck(byte[] data) : base(data)
         {
@@ -420,7 +141,7 @@ namespace PcapDecrypt.Packets
         }
     }
 
-    public class PKT_C2S_LockCamera : Packets
+    public class PKT_C2S_LockCamera : Packet
     {
         public PKT_C2S_LockCamera(byte[] data) : base(data)
         {
@@ -432,7 +153,7 @@ namespace PcapDecrypt.Packets
         }
     }
 
-    public class PKT_S2C_ObjectSpawn : Packets //Minion Spawn
+    public class PKT_S2C_ObjectSpawn : Packet //Minion Spawn
     {
         public PKT_S2C_ObjectSpawn(byte[] bytes) : base(bytes)
         {
@@ -512,7 +233,7 @@ namespace PcapDecrypt.Packets
         }
     }
 
-    class PKT_S2C_SpellAnimation : Packets
+    class PKT_S2C_SpellAnimation : Packet
     {
         public PKT_S2C_SpellAnimation(byte[] bytes) : base(bytes)
         {
@@ -527,7 +248,7 @@ namespace PcapDecrypt.Packets
         }
     }
 
-    class PKT_S2C_SetAnimation : Packets
+    class PKT_S2C_SetAnimation : Packet
     {
         public PKT_S2C_SetAnimation(byte[] bytes) : base(bytes)
         {
@@ -546,7 +267,7 @@ namespace PcapDecrypt.Packets
         }
     }
 
-    public class PKT_S2C_FaceDirection : Packets
+    public class PKT_S2C_FaceDirection : Packet
     {
         public PKT_S2C_FaceDirection(byte[] bytes) : base(bytes)
         {
@@ -561,7 +282,7 @@ namespace PcapDecrypt.Packets
         }
     };
 
-    public class PKT_S2C_FloatingText : Packets
+    public class PKT_S2C_FloatingText : Packet
     {
         public PKT_S2C_FloatingText(byte[] bytes) : base(bytes)
         {
@@ -570,7 +291,7 @@ namespace PcapDecrypt.Packets
         }
     };
 
-    public class PKT_S2C_Dash : Packets
+    public class PKT_S2C_Dash : Packet
     {
         public PKT_S2C_Dash(byte[] bytes) : base(bytes)
         {
@@ -599,7 +320,7 @@ namespace PcapDecrypt.Packets
         }
     }
 
-    public class PKT_S2C_LeaveVision : Packets
+    public class PKT_S2C_LeaveVision : Packet
     {
         public PKT_S2C_LeaveVision(byte[] bytes) : base(bytes)
         {
@@ -609,7 +330,7 @@ namespace PcapDecrypt.Packets
         }
     }
 
-    public class PKT_S2C_DeleteObject : Packets
+    public class PKT_S2C_DeleteObject : Packet
     {
         public PKT_S2C_DeleteObject(byte[] bytes) : base(bytes)
         {
@@ -619,7 +340,7 @@ namespace PcapDecrypt.Packets
         }
     }
 
-    public class AddGold : Packets
+    public class AddGold : Packet
     {
         public AddGold(byte[] bytes) : base(bytes)
         {
@@ -632,7 +353,7 @@ namespace PcapDecrypt.Packets
         }
     }
 
-    public class PKT_C2S_MoveReq : Packets
+    public class PKT_C2S_MoveReq : Packet
     {
         public PKT_C2S_MoveReq(byte[] data) : base(data)
         {
@@ -644,12 +365,12 @@ namespace PcapDecrypt.Packets
             readInt("targetNetId");
             readByte("coordsCount");
             readInt("netId");
-            readFill((int)(reader.BaseStream.Length - reader.BaseStream.Position), "moveData");
+            readFill((int)(Reader.BaseStream.Length - Reader.BaseStream.Position), "moveData");
             close();
         }
     }
 
-    public class PKT_S2C_MoveAns : Packets
+    public class PKT_S2C_MoveAns : Packet
     {
         public PKT_S2C_MoveAns(byte[] bytes) : base(bytes)
         {
@@ -662,7 +383,7 @@ namespace PcapDecrypt.Packets
             {
                 readByte("teleportId?");
                 readInt("netId");
-                if ((reader.BaseStream.Length - reader.BaseStream.Position) > 4)
+                if ((Reader.BaseStream.Length - Reader.BaseStream.Position) > 4)
                 {
                     readByte("unk(1)");
                 }
@@ -684,7 +405,7 @@ namespace PcapDecrypt.Packets
         }
     }
 
-    public class PKT_S2C_QueryStatusAns : Packets
+    public class PKT_S2C_QueryStatusAns : Packet
     {
         public PKT_S2C_QueryStatusAns(byte[] bytes) : base(bytes)
         {
@@ -695,7 +416,7 @@ namespace PcapDecrypt.Packets
         }
     }
 
-    public class PKT_C2S_QueryStatusReq : Packets
+    public class PKT_C2S_QueryStatusReq : Packet
     {
         public PKT_C2S_QueryStatusReq(byte[] bytes) : base(bytes)
         {
@@ -705,7 +426,7 @@ namespace PcapDecrypt.Packets
         }
     }
 
-    public class PKT_C2S_SynchVersion : Packets
+    public class PKT_C2S_SynchVersion : Packet
     {
         public PacketCmdS2C cmd;
         public int netId;
@@ -722,7 +443,7 @@ namespace PcapDecrypt.Packets
         }
     }
 
-    public class PKT_S2C_World_SendGameNumber : Packets
+    public class PKT_S2C_World_SendGameNumber : Packet
     {
         public PKT_S2C_World_SendGameNumber(byte[] bytes) : base(bytes)
         {
@@ -735,7 +456,7 @@ namespace PcapDecrypt.Packets
     }
 
     //app crash inc
-    public class PKT_C2S_StatsConfirm : Packets
+    public class PKT_C2S_StatsConfirm : Packet
     {
         public PKT_C2S_StatsConfirm(byte[] bytes) : base(bytes)
         {
@@ -758,11 +479,11 @@ namespace PcapDecrypt.Packets
         }
     }
 
-    public class PKT_C2S_ChatBoxMessage : Packets
+    public class PKT_C2S_ChatBoxMessage : Packet
     {
         public PKT_C2S_ChatBoxMessage(byte[] data) : base(data)
         {
-            var reader = new BinaryReader(new MemoryStream(data));
+            var Reader = new BinaryReader(new MemoryStream(data));
             readByte("cmd");
             readInt("playerNetId");
             readInt("botNetId");
@@ -776,7 +497,7 @@ namespace PcapDecrypt.Packets
         }
     }
 
-    public class PKT_S2C_UpdateModel : Packets
+    public class PKT_S2C_UpdateModel : Packet
     {
         public PKT_S2C_UpdateModel(byte[] bytes) : base(bytes)
         {
@@ -790,7 +511,7 @@ namespace PcapDecrypt.Packets
         }
     }
 
-    public class PKT_S2C_EditBuff : Packets
+    public class PKT_S2C_EditBuff : Packet
     {
         public PKT_S2C_EditBuff(byte[] bytes) : base(bytes)
         {
@@ -799,7 +520,7 @@ namespace PcapDecrypt.Packets
         }
     }
 
-    public class PKT_S2C_EndSpawn : Packets
+    public class PKT_S2C_EndSpawn : Packet
     {
         public PKT_S2C_EndSpawn(byte[] bytes) : base(bytes)
         {
@@ -815,7 +536,7 @@ namespace PcapDecrypt.Packets
         }
     }
 
-    public class PKT_S2C_StartSpawn : Packets
+    public class PKT_S2C_StartSpawn : Packet
     {
         public PKT_S2C_StartSpawn(byte[] bytes) : base(bytes)
         {
@@ -841,7 +562,7 @@ namespace PcapDecrypt.Packets
         }
     }*/
 
-    public class Click : Packets
+    public class Click : Packet
     {
         public Click(byte[] data) : base(data)
         {
@@ -853,7 +574,7 @@ namespace PcapDecrypt.Packets
         }
     }
 
-    public class PKT_S2C_HeroSpawn : Packets
+    public class PKT_S2C_HeroSpawn : Packet
     {
         public PKT_S2C_HeroSpawn(byte[] bytes) : base(bytes)
         {
@@ -877,7 +598,7 @@ namespace PcapDecrypt.Packets
         }
     }
 
-    public class PKT_S2C_TurretSpawn : Packets
+    public class PKT_S2C_TurretSpawn : Packet
     {
         public PKT_S2C_TurretSpawn(byte[] b) : base(b)
         {
@@ -896,7 +617,7 @@ namespace PcapDecrypt.Packets
         }
     }
 
-    public class PKT_S2C_GameEnd : Packets
+    public class PKT_S2C_GameEnd : Packet
     {
         public PKT_S2C_GameEnd(byte[] bytes) : base(bytes)
         {
@@ -907,7 +628,7 @@ namespace PcapDecrypt.Packets
         }
     }
 
-    public class PKT_S2C_GameTimer : Packets
+    public class PKT_S2C_GameTimer : Packet
     {
         public PKT_S2C_GameTimer(byte[] bytes) : base(bytes)
         {
@@ -918,7 +639,7 @@ namespace PcapDecrypt.Packets
         }
     }
 
-    public class PKT_S2C_GameTimerUpdate : Packets
+    public class PKT_S2C_GameTimerUpdate : Packet
     {
         public PKT_S2C_GameTimerUpdate(byte[] bytes) : base(bytes)
         {
@@ -928,7 +649,7 @@ namespace PcapDecrypt.Packets
         }
     }
 
-    public class PKT_C2S_HeartBeat : Packets
+    public class PKT_C2S_HeartBeat : Packet
     {
         public PKT_C2S_HeartBeat(byte[] data) : base(data)
         {
@@ -955,7 +676,7 @@ namespace PcapDecrypt.Packets
          }
      }*/
 
-    public class PKT_C2S_SkillUp : Packets
+    public class PKT_C2S_SkillUp : Packet
     {
         public PacketCmdC2S cmd;
         public int netId;
@@ -968,7 +689,7 @@ namespace PcapDecrypt.Packets
             close();
         }
     }
-    public class PKT_S2C_SkillUp : Packets
+    public class PKT_S2C_SkillUp : Packet
     {
         public PKT_S2C_SkillUp(byte[] bytes) : base(bytes)
         {
@@ -981,7 +702,7 @@ namespace PcapDecrypt.Packets
         }
     }
 
-    public class PKT_S2C_Batch : Packets
+    public class PKT_S2C_Batch : Packet
     {
         public PKT_S2C_Batch(byte[] bytes) : base(bytes)
         {
@@ -990,12 +711,12 @@ namespace PcapDecrypt.Packets
             readByte("size");
             readByte("opCode");
             readUInt("netId");
-            readFill((int)(reader.BaseStream.Length - reader.BaseStream.Position), "packets");
+            readFill((int)(Reader.BaseStream.Length - Reader.BaseStream.Position), "Packet");
             close();
         }
     }
 
-    public class PKT_C2S_BuyItemReq : Packets
+    public class PKT_C2S_BuyItemReq : Packet
     {
         public PKT_C2S_BuyItemReq(byte[] bytes) : base(bytes)
         {
@@ -1006,7 +727,7 @@ namespace PcapDecrypt.Packets
         }
     }
 
-    public class PKT_S2C_BuyItemAns : Packets
+    public class PKT_S2C_BuyItemAns : Packet
     {
         public PKT_S2C_BuyItemAns(byte[] bytes) : base(bytes)
         {
@@ -1021,7 +742,7 @@ namespace PcapDecrypt.Packets
         }
     }
 
-    public class PKT_C2S_SellItem : Packets
+    public class PKT_C2S_SellItem : Packet
     {
         public PKT_C2S_SellItem(byte[] bytes) : base(bytes)
         {
@@ -1033,7 +754,7 @@ namespace PcapDecrypt.Packets
     }
 
 
-    public class PKT_S2C_RemoveItem : Packets
+    public class PKT_S2C_RemoveItem : Packet
     {
         public PKT_S2C_RemoveItem(byte[] bytes) : base(bytes)
         {
@@ -1044,7 +765,7 @@ namespace PcapDecrypt.Packets
         }
     }
 
-    public class PKT_C2S_Emotion : Packets
+    public class PKT_C2S_Emotion : Packet
     {
         public PKT_C2S_Emotion(byte[] bytes) : base(bytes)
         {
@@ -1062,7 +783,7 @@ namespace PcapDecrypt.Packets
         }
     }
 
-    public class PKT_S2C_Extended : Packets
+    public class PKT_S2C_Extended : Packet
     {
         public PKT_S2C_Extended(byte[] bytes) : base(bytes)
         {
@@ -1070,11 +791,11 @@ namespace PcapDecrypt.Packets
             readInt("netId");
             readByte("eCmd");
             readInt("netId");
-            readFill((int)(reader.BaseStream.Length - reader.BaseStream.Position), "eCmdInfo"); // TODO: Analyze extended packets
+            readFill((int)(Reader.BaseStream.Length - Reader.BaseStream.Position), "eCmdInfo"); // TODO: Analyze extended Packet
         }
     }
 
-    public class PKT_C2S_SwapItems : Packets
+    public class PKT_C2S_SwapItems : Packet
     {
         public PKT_C2S_SwapItems(byte[] bytes) : base(bytes)
         {
@@ -1093,7 +814,7 @@ namespace PcapDecrypt.Packets
         }
     }
 
-    class PKT_S2C_Announce : Packets
+    class PKT_S2C_Announce : Packet
     {
         public PKT_S2C_Announce(byte[] bytes) : base(bytes)
         {
@@ -1101,13 +822,13 @@ namespace PcapDecrypt.Packets
             readInt("netId");
             readByte("msgId");
             readLong("unk");
-            if (reader.BaseStream.Position < reader.BaseStream.Length)
+            if (Reader.BaseStream.Position < Reader.BaseStream.Length)
                 readInt("mapId");
             close();
         }
     }
 
-    public class PKT_S2C_AddBuff : Packets
+    public class PKT_S2C_AddBuff : Packet
     {
         public PKT_S2C_AddBuff(byte[] bytes) : base(bytes)
         {
@@ -1126,7 +847,7 @@ namespace PcapDecrypt.Packets
         }
     }
 
-    public class PKT_S2C_RemoveBuff : Packets
+    public class PKT_S2C_RemoveBuff : Packet
     {
         public PKT_S2C_RemoveBuff(byte[] bytes) : base(bytes)
         {
@@ -1139,7 +860,7 @@ namespace PcapDecrypt.Packets
         }
     }
 
-    public class PKT_S2C_DamageDone : Packets
+    public class PKT_S2C_DamageDone : Packet
     {
         public PKT_S2C_DamageDone(byte[] bytes) : base(bytes)
         {
@@ -1154,7 +875,7 @@ namespace PcapDecrypt.Packets
         }
     }
 
-    public class EPKT_S2C_NPC_Die : Packets
+    public class EPKT_S2C_NPC_Die : Packet
     {
         public EPKT_S2C_NPC_Die(byte[] bytes) : base(bytes)
         {
@@ -1172,7 +893,7 @@ namespace PcapDecrypt.Packets
         }
     }
 
-    public class PKT_S2C_LoadName : Packets
+    public class PKT_S2C_LoadName : Packet
     {
         public PKT_S2C_LoadName(byte[] bytes) : base(bytes)
         {
@@ -1185,7 +906,7 @@ namespace PcapDecrypt.Packets
         }
     }
 
-    public class PKT_S2C_LoadHero : Packets
+    public class PKT_S2C_LoadHero : Packet
     {
         public PKT_S2C_LoadHero(byte[] bytes) : base(bytes)
         {
@@ -1198,7 +919,7 @@ namespace PcapDecrypt.Packets
         }
     }
 
-    public class PKT_C2S_AttentionPing : Packets
+    public class PKT_C2S_AttentionPing : Packet
     {
         public PKT_C2S_AttentionPing(byte[] bytes) : base(bytes)
         {
@@ -1212,7 +933,7 @@ namespace PcapDecrypt.Packets
         }
     }
 
-    public class PKT_S2C_AttentionPing : Packets
+    public class PKT_S2C_AttentionPing : Packet
     {
         public PKT_S2C_AttentionPing(byte[] bytes) : base(bytes)
         {
@@ -1228,7 +949,7 @@ namespace PcapDecrypt.Packets
         }
     }
 
-    public class PKT_S2C_BeginAutoAttack : Packets
+    public class PKT_S2C_BeginAutoAttack : Packet
     {
         public PKT_S2C_BeginAutoAttack(byte[] bytes) : base(bytes)
         {
@@ -1254,7 +975,7 @@ namespace PcapDecrypt.Packets
         }
     }
 
-    public class PKT_S2C_NextAutoAttack : Packets
+    public class PKT_S2C_NextAutoAttack : Packet
     {
         public PKT_S2C_NextAutoAttack(byte[] bytes) : base(bytes)
         {
@@ -1280,7 +1001,7 @@ namespace PcapDecrypt.Packets
         }
     }
 
-    public class PKT_S2C_StopAutoAttack : Packets
+    public class PKT_S2C_StopAutoAttack : Packet
     {
         public PKT_S2C_StopAutoAttack(byte[] bytes) : base(bytes)
         {
@@ -1292,7 +1013,7 @@ namespace PcapDecrypt.Packets
         }
     }
 
-    public class PKT_S2C_Surrender : Packets
+    public class PKT_S2C_Surrender : Packet
     {
         public PKT_S2C_Surrender(byte[] bytes) : base(bytes)
         {
@@ -1307,7 +1028,7 @@ namespace PcapDecrypt.Packets
             close();
         }
     }
-    public class PKT_S2C_SurrenderResult : Packets
+    public class PKT_S2C_SurrenderResult : Packet
     {
         public PKT_S2C_SurrenderResult(byte[] bytes) : base(bytes)
         {
@@ -1321,7 +1042,7 @@ namespace PcapDecrypt.Packets
         }
     }
 
-    public class EPKT_S2C_OnAttack : Packets
+    public class EPKT_S2C_OnAttack : Packet
     {
         public EPKT_S2C_OnAttack(byte[] bytes) : base(bytes)
         {
@@ -1338,7 +1059,7 @@ namespace PcapDecrypt.Packets
         }
     }
 
-    public class PKT_S2C_SetCooldown : Packets
+    public class PKT_S2C_SetCooldown : Packet
     {
         public PKT_S2C_SetCooldown(byte[] bytes) : base(bytes)
         {
@@ -1353,7 +1074,7 @@ namespace PcapDecrypt.Packets
 
     }
 
-    public class PKT_S2C_SetTarget : Packets
+    public class PKT_S2C_SetTarget : Packet
     {
         public PKT_S2C_SetTarget(byte[] bytes) : base(bytes)
         {
@@ -1374,7 +1095,7 @@ namespace PcapDecrypt.Packets
 
     }
 
-    public class PKT_S2C_ChampionDie : Packets
+    public class PKT_S2C_ChampionDie : Packet
     {
 
         public PKT_S2C_ChampionDie(byte[] bytes) : base(bytes)
@@ -1391,7 +1112,7 @@ namespace PcapDecrypt.Packets
         }
     }
 
-    public class EPKT_S2C_ChampionDeathTimer : Packets
+    public class EPKT_S2C_ChampionDeathTimer : Packet
     {
 
         public EPKT_S2C_ChampionDeathTimer(byte[] bytes) : base(bytes)
@@ -1405,7 +1126,7 @@ namespace PcapDecrypt.Packets
         }
     }
 
-    public class PKT_S2C_ChampionRespawn : Packets
+    public class PKT_S2C_ChampionRespawn : Packet
     {
         public PKT_S2C_ChampionRespawn(byte[] bytes) : base(bytes)
         {
@@ -1418,7 +1139,7 @@ namespace PcapDecrypt.Packets
         }
     }
 
-    public class PKT_S2C_ShowProjectile : Packets
+    public class PKT_S2C_ShowProjectile : Packet
     {
         public PKT_S2C_ShowProjectile(byte[] bytes) : base(bytes)
         {
@@ -1429,14 +1150,14 @@ namespace PcapDecrypt.Packets
         }
     }
 
-    public class PKT_S2C_SetHealth : Packets
+    public class PKT_S2C_SetHealth : Packet
     {
         public PKT_S2C_SetHealth(byte[] bytes) : base(bytes)
         {
             readByte("cmd");
             readUInt("netId/itemHash");
             readShort("unk");
-            if (reader.BaseStream.Position < reader.BaseStream.Length)
+            if (Reader.BaseStream.Position < Reader.BaseStream.Length)
             {
                 readFloat("maxHP");
                 readFloat("currentHp");
@@ -1445,7 +1166,7 @@ namespace PcapDecrypt.Packets
         }
     }
 
-    public class PKT_C2S_CastSpell : Packets
+    public class PKT_C2S_CastSpell : Packet
     {
         public PKT_C2S_CastSpell(byte[] bytes) : base(bytes)
         {
@@ -1462,7 +1183,7 @@ namespace PcapDecrypt.Packets
         }
     }
 
-    public class PKT_S2C_CastSpellAns : Packets
+    public class PKT_S2C_CastSpellAns : Packet
     {
 
         public PKT_S2C_CastSpellAns(byte[] bytes) : base(bytes)
@@ -1505,7 +1226,7 @@ namespace PcapDecrypt.Packets
         }
     }
 
-    public class PKT_S2C_PlayerInfo : Packets
+    public class PKT_S2C_PlayerInfo : Packet
     {
         public PKT_S2C_PlayerInfo(byte[] bytes) : base(bytes)
         {
@@ -2044,7 +1765,7 @@ namespace PcapDecrypt.Packets
         }
     }
 
-    public class PKT_S2C_SpawnProjectile : Packets
+    public class PKT_S2C_SpawnProjectile : Packet
     {
 
         public PKT_S2C_SpawnProjectile(byte[] bytes) : base(bytes)
@@ -2110,7 +1831,7 @@ namespace PcapDecrypt.Packets
 
     }
 
-    public class PKT_S2C_SpawnParticle : Packets
+    public class PKT_S2C_SpawnParticle : Packet
     {
         public PKT_S2C_SpawnParticle(byte[] bytes) : base(bytes)
         {
@@ -2145,7 +1866,7 @@ namespace PcapDecrypt.Packets
         }
     }
 
-    public class PKT_S2C_DestroyProjectile : Packets
+    public class PKT_S2C_DestroyProjectile : Packet
     {
         public PKT_S2C_DestroyProjectile(byte[] bytes) : base(bytes)
         {
@@ -2154,7 +1875,7 @@ namespace PcapDecrypt.Packets
         }
     }
         /*
-                public class PKT_S2C_CharStats : Packets
+                public class PKT_S2C_CharStats : Packet
                 {
                     public PKT_S2C_CharStats(byte[] bytes) : base(bytes)
                     {
@@ -2214,7 +1935,7 @@ namespace PcapDecrypt.Packets
                     }
                 }
                 */
-    public class PKT_S2C_LevelPropSpawn : Packets
+    public class PKT_S2C_LevelPropSpawn : Packet
     {
         public PKT_S2C_LevelPropSpawn(byte[] bytes) : base(bytes)
         {
@@ -2245,7 +1966,7 @@ namespace PcapDecrypt.Packets
         }
     }
 
-    public class PKT_C2S_ViewReq : Packets
+    public class PKT_C2S_ViewReq : Packet
     {
         public PKT_C2S_ViewReq(byte[] bytes) : base(bytes)
         {
@@ -2263,7 +1984,7 @@ namespace PcapDecrypt.Packets
         }
     }
 
-    public class PKT_S2C_LevelUp : Packets
+    public class PKT_S2C_LevelUp : Packet
     {
         public PKT_S2C_LevelUp(byte[] bytes) : base(bytes)
         {
@@ -2275,7 +1996,7 @@ namespace PcapDecrypt.Packets
         }
     }
 
-    public class PKT_S2C_ViewAns : Packets
+    public class PKT_S2C_ViewAns : Packet
     {
         public PKT_S2C_ViewAns(byte[] bytes) : base(bytes)
         {
@@ -2286,7 +2007,7 @@ namespace PcapDecrypt.Packets
         }
     }
 
-    public class PKT_S2C_DebugMessage : Packets
+    public class PKT_S2C_DebugMessage : Packet
     {
         public PKT_S2C_DebugMessage(byte[] bytes) : base(bytes)
         {
@@ -2298,7 +2019,7 @@ namespace PcapDecrypt.Packets
         }
     }
 
-    public class SetCooldown : Packets
+    public class SetCooldown : Packet
     {
         public SetCooldown(byte[] bytes) : base(bytes)
         {

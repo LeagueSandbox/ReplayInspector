@@ -6,13 +6,11 @@ using SharpPcap;
 using SharpPcap.LibPcap;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
 using static BlowFishCS.BlowFishCS;
 using System.Windows.Forms;
-using System.Runtime.Remoting;
 using PcapDecrypt.Packets;
 
 namespace PcapDecrypt
@@ -23,8 +21,8 @@ namespace PcapDecrypt
         private static Dictionary<int, Dictionary<int, byte[]>> fragmentBuffer = new Dictionary<int, Dictionary<int, byte[]>>();
         private static List<string> toWrite = new List<string>();
 
-        public static List<Packets.Packets> PacketList = new List<Packets.Packets>();
-        public static List<Packets.Packets> BatchPacketList = new List<Packets.Packets>();
+        public static List<Packets.Packet> PacketList = new List<Packets.Packet>();
+        public static List<Packets.Packet> BatchPacketList = new List<Packets.Packet>();
         public static bool filtering = false;
         public static byte filter = (byte)PacketCmdS2C.PKT_S2C_ChatBoxMessage;
         public static bool printToFile = false;
@@ -177,11 +175,11 @@ namespace PcapDecrypt
 
             if (!filtering)
             {
-                PacketList.Add(CreatePacket(e.Packet.Data));
+                PacketList.Add(new Packets.Packet(e.Packet.Data));
             }
             if (filtering && e.Packet.Data[0] == filter)
             {
-                PacketList.Add(CreatePacket(e.Packet.Data));
+                PacketList.Add(new Packets.Packet(e.Packet.Data));
             }
         }
 
@@ -271,11 +269,11 @@ namespace PcapDecrypt
             */
             if (!filtering)
             {
-                PacketList.Add(CreatePacket(decrypted));
+                PacketList.Add(new Packets.Packet(decrypted));
             }
             if (filtering && (decrypted[0] == filter))
             {
-                PacketList.Add(CreatePacket(decrypted));
+                PacketList.Add(new Packets.Packet(decrypted));
             }
 
             if (decrypted[0] == 0xFF)
@@ -286,7 +284,7 @@ namespace PcapDecrypt
                     decodeBatch(decrypted, time, C2S);
                     if (toAdd)
                     {
-                        PacketList.Add(CreatePacket(decrypted));
+                        PacketList.Add(new Packets.Packet(decrypted));
                     }
                 }
                 catch
@@ -297,7 +295,7 @@ namespace PcapDecrypt
             }
         }
 
-        public static Packets.Packets CreatePacket(byte[] bytes)
+        public static Packets.Packet CreatePacket(byte[] bytes)
         {
             switch ((PacketCmdS2C)bytes[0]) // This looks horrible, don't hate me please :3
             {
@@ -434,16 +432,16 @@ namespace PcapDecrypt
             }
         }
 
-        public static Packets.Packets GetInstance(string strFullyQualifiedName)
+        public static Packets.Packet GetInstance(string strFullyQualifiedName)
         {
             Type type = Type.GetType(strFullyQualifiedName);
             if (type != null)
-                return (Packets.Packets)Activator.CreateInstance(type);
+                return (Packets.Packet)Activator.CreateInstance(type);
             foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
             {
                 type = asm.GetType(strFullyQualifiedName);
                 if (type != null)
-                    return (Packets.Packets)Activator.CreateInstance(type);
+                    return (Packets.Packet)Activator.CreateInstance(type);
             }
             return null;
         }
@@ -484,11 +482,11 @@ namespace PcapDecrypt
                 var decrypted = decrypt(packet.ToArray());
                 if (!filtering)
                 {
-                    PacketList.Add(CreatePacket(decrypted));
+                    PacketList.Add(new Packets.Packet(decrypted));
                 }
                 if (filtering && decrypted[0] == filter)
                 {
-                    PacketList.Add(CreatePacket(decrypted));
+                    PacketList.Add(new Packets.Packet(decrypted));
                 }
                 printPacket(decrypted, time, C2S);
                 fragmentBuffer.Remove(fragmentGroup);
@@ -522,13 +520,13 @@ namespace PcapDecrypt
             {
                 toAdd = true;
                 BatchPacketList.Clear();
-                BatchPacketList.Add(CreatePacket(firstPacket.ToArray()));
+                BatchPacketList.Add(new Packets.Packet(firstPacket.ToArray()));
             }
             if (filtering && firstPacket.ToArray()[0] == filter)
             {
                 toAdd = true;
                 BatchPacketList.Clear();
-                BatchPacketList.Add(CreatePacket(firstPacket.ToArray()));
+                BatchPacketList.Add(new Packets.Packet(firstPacket.ToArray()));
             }
 
             for (int i = 2; i < packetCount + 1; i++)
@@ -567,12 +565,12 @@ namespace PcapDecrypt
                 if (!filtering)
                 {
                     toAdd = true;
-                    BatchPacketList.Add(CreatePacket(buffer.ToArray()));
+                    BatchPacketList.Add(new Packets.Packet(buffer.ToArray()));
                 }
                 if (filtering && buffer.ToArray()[0] == filter)
                 {
                     toAdd = true;
-                    BatchPacketList.Add(CreatePacket(buffer.ToArray()));
+                    BatchPacketList.Add(new Packets.Packet(buffer.ToArray()));
                 }
                 printPacket(buffer.ToArray(), time, C2S, false);
 
