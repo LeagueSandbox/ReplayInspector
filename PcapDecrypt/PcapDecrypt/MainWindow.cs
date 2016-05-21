@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
@@ -9,6 +10,7 @@ namespace PcapDecrypt
     {
         int SelectedPacketSection;
         int SelectedPacketSectionLength;
+        private List<Packets.Packet> _originalPacketList;
 
         public MainWindow()
         {
@@ -17,6 +19,7 @@ namespace PcapDecrypt
 
         private void MainWindow_Load(object sender, EventArgs e)
         {
+            Console.WriteLine("Loading GUI, please wait...");
             Console.WriteLine("Trying to add " + Program.PacketList.Count + " packets to the packet list");
             int index = 0;
             foreach (var Packet in Program.PacketList)
@@ -24,7 +27,14 @@ namespace PcapDecrypt
                 listBox2.Items.Add(index + " cmd: " + (PacketCmdS2C)Packet.Bytes[0]);
                 index++;
             }
-            textBox2.Text = listBox2.Items.Count + "/" + Program.PacketList.Count();
+            _originalPacketList = Program.PacketList;
+            label5.Text = "Showing " + listBox2.Items.Count + " packets. Total: " + Program.PacketList.Count();
+            label6.Text = "";
+            foreach (var PacketCommand in Enum.GetValues(typeof(PacketCmdS2C)))
+            {
+                comboBox1.Items.Add(PacketCommand.ToString());
+            }
+            Console.WriteLine("GUI loaded");
         }
 
         private unsafe void listBox1_SelectedIndexChanged(object sender, EventArgs e)
@@ -43,19 +53,19 @@ namespace PcapDecrypt
                 }
                 Console.WriteLine();*/
 
-                foreach (var ps in Program.PacketList[listBox2.SelectedIndex].Payload)
+                foreach (var PacketField in Program.PacketList[listBox2.SelectedIndex].Payload)
                 {
-                    int indexofps = Program.PacketList[listBox2.SelectedIndex].Payload.IndexOf(ps);
-                    if (indexofps == SelectedPacketSection)
+                    int indexOfPacketField = Program.PacketList[listBox2.SelectedIndex].Payload.IndexOf(PacketField);
+                    if (indexOfPacketField == SelectedPacketSection)
                     {
-                        foreach (var b in ps.Bytes)
+                        foreach (var b in PacketField.Bytes)
                         {
                             AppendText(richTextBox1, b.ToString("X2") + " ", Color.LightGreen);
                         }
                     }
                     else
                     {
-                        foreach (var b in ps.Bytes)
+                        foreach (var b in PacketField.Bytes)
                         {
                             AppendText(richTextBox1, b.ToString("X2") + " ", richTextBox1.BackColor);
                         }
@@ -102,6 +112,7 @@ namespace PcapDecrypt
             //Console.WriteLine(listBox2.SelectedIndex);
             Program.PacketList[listBox2.SelectedIndex] = Program.CreatePacket(Program.PacketList[listBox2.SelectedIndex].Bytes);
             listBox3.Items.Clear();
+            label6.Text = "";
             listBox1.Items.Clear();
             richTextBox1.Clear();
             foreach (var b in Program.PacketList[listBox2.SelectedIndex].Bytes)
@@ -123,7 +134,7 @@ namespace PcapDecrypt
                     listBox3.Items.Add(index + " cmd: " + (PacketCmdS2C)Packet.Bytes[0]);
                     index++;
                 }
-                textBox1.Text = listBox3.Items.Count.ToString() + "/" + Program.BatchPacketList.Count().ToString();
+                label6.Text = "Showing " + listBox3.Items.Count.ToString() + " packets. Total: " + Program.BatchPacketList.Count().ToString();
             }
         }
         private void listBox3_SelectedIndexChanged(object sender, EventArgs e)
@@ -151,6 +162,84 @@ namespace PcapDecrypt
             box.SelectionBackColor = color;
             box.AppendText(text);
             box.SelectionBackColor = box.ForeColor;
+        }
+
+        private void checkBox1_CheckedChanged(object sender, EventArgs e)
+        {
+            Program.filtering = checkBox1.Checked;
+            listBox2.Items.Clear();
+            if (Program.filtering)
+            {
+                List<Packets.Packet> temp = new List<Packets.Packet>();
+                foreach (var Packet in Program.PacketList)
+                {
+                    if (Program.filteringSearchInBatch && Packet.Bytes[0] == 0xFF)
+                    {
+                        try
+                        {
+                            Program.decodeBatch(Packet.Bytes, 0, false);
+                            foreach (var PacketInBatch in Program.BatchPacketList)
+                            {
+                                if (PacketInBatch.Bytes[0] == Program.filter)
+                                {
+                                    temp.Add(Packet);
+                                    break;
+                                }
+                            }
+                        }
+                        catch { }
+                    }
+                    if (Packet.Bytes[0] == Program.filter)
+                    {
+                        temp.Add(Packet);
+                    }
+                }
+                Program.PacketList = temp;
+
+                int index = 0;
+                foreach (var Packet in Program.PacketList)
+                {
+                    listBox2.Items.Add(index + " cmd: " + (PacketCmdS2C)Packet.Bytes[0]);
+                    index++;
+                }
+                label5.Text = "Showing " + listBox2.Items.Count + " packets. Total: " + Program.PacketList.Count();
+                label6.Text = "";
+            }
+            else
+            {
+                Program.PacketList = _originalPacketList;
+
+                int index = 0;
+                foreach (var Packet in Program.PacketList)
+                {
+                    listBox2.Items.Add(index + " cmd: " + (PacketCmdS2C)Packet.Bytes[0]);
+                    index++;
+                }
+                label5.Text = "Showing " + listBox2.Items.Count + " packets. Total: " + Program.PacketList.Count();
+                label6.Text = "";
+            }
+        }
+
+        private void checkBox2_CheckedChanged(object sender, EventArgs e)
+        {
+            Program.filteringSearchInBatch = checkBox2.Checked;
+        }
+
+        private void label4_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label8_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            var selectedCommand = comboBox1.Items[comboBox1.SelectedIndex];
+            PacketCmdS2C selectedCommandValue = (PacketCmdS2C)Enum.Parse(typeof(PacketCmdS2C), selectedCommand.ToString());
+            Program.filter = (byte)selectedCommandValue;
         }
     }
 }

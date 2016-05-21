@@ -25,6 +25,7 @@ namespace PcapDecrypt
         public static List<Packets.Packet> BatchPacketList = new List<Packets.Packet>();
         public static bool filtering = false;
         public static byte filter = (byte)PacketCmdS2C.PKT_S2C_ChatBoxMessage;
+        public static bool filteringSearchInBatch = false;
         public static bool printToFile = false;
         public static bool toAdd;
 
@@ -75,7 +76,6 @@ namespace PcapDecrypt
                 }
             }
 
-            Console.WriteLine("Loading GUI, please wait...");
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new MainWindow());
@@ -92,7 +92,7 @@ namespace PcapDecrypt
             Console.ReadLine();
         }
 
-        private static void parsePackets(List<Json.Packet> packets)
+        internal /*private*/ static void parsePackets(List<Json.Packet> packets)
         {
             foreach (var packet in packets)
             {
