@@ -4,7 +4,7 @@ namespace PcapDecrypt.Packets
 {
     public class PKT_S2C_Unknown : Packet
     {
-        public PKT_S2C_Unknown(byte[] data) : base(data)
+        public PKT_S2C_Unknown(byte[] data, float time) : base(data, time)
         {
             readByte("cmd");
             close();
@@ -13,7 +13,7 @@ namespace PcapDecrypt.Packets
 
     public class PKT_C2S_ClientReady : Packet
     {
-        public PKT_C2S_ClientReady(byte[] data) : base(data)
+        public PKT_C2S_ClientReady(byte[] data, float time) : base(data, time)
         {
             readByte("cmd");
             readInt("playerId");
@@ -25,7 +25,7 @@ namespace PcapDecrypt.Packets
     public class PKT_S2C_SynchVersion : Packet
     {
 
-        public PKT_S2C_SynchVersion(byte[] bytes) : base(bytes)
+        public PKT_S2C_SynchVersion(byte[] bytes, float time) : base(bytes, time)
         {
             readByte("cmd");
             readInt("netId");
@@ -70,7 +70,7 @@ namespace PcapDecrypt.Packets
         public short unk3;
         public byte unk4;
 
-        public PKT_S2C_Ping_Load_Info(byte[] data) : base(data)
+        public PKT_S2C_Ping_Load_Info(byte[] data, float time) : base(data, time)
         {
             readByte("cmd");
             readInt("netId");
@@ -86,7 +86,7 @@ namespace PcapDecrypt.Packets
     }
     public class PKT_C2S_Ping_Load_Info : PKT_S2C_Ping_Load_Info
     {
-        public PKT_C2S_Ping_Load_Info(byte[] data) : base(data)
+        public PKT_C2S_Ping_Load_Info(byte[] data, float time) : base(data, time)
         {
 
         }
@@ -94,7 +94,7 @@ namespace PcapDecrypt.Packets
 
     public class PKT_S2C_LoadScreenInfo : Packet
     {
-        public PKT_S2C_LoadScreenInfo(byte[] bytes) : base(bytes)
+        public PKT_S2C_LoadScreenInfo(byte[] bytes, float time) : base(bytes, time)
         {
             readByte("cmd");
             //Zero this complete buffer
@@ -118,7 +118,7 @@ namespace PcapDecrypt.Packets
 
     public class PKT_S2C_KeyCheck : Packet
     {
-        public PKT_S2C_KeyCheck(byte[] data) : base(data)
+        public PKT_S2C_KeyCheck(byte[] data, float time) : base(data, time)
         {
             readByte("cmd");
             readByte("unk(0x2A?)");
@@ -135,7 +135,7 @@ namespace PcapDecrypt.Packets
 
     public class PKT_C2S_KeyCheck : PKT_S2C_KeyCheck
     {
-        public PKT_C2S_KeyCheck(byte[] data) : base(data)
+        public PKT_C2S_KeyCheck(byte[] data, float time) : base(data, time)
         {
 
         }
@@ -143,7 +143,7 @@ namespace PcapDecrypt.Packets
 
     public class PKT_C2S_LockCamera : Packet
     {
-        public PKT_C2S_LockCamera(byte[] data) : base(data)
+        public PKT_C2S_LockCamera(byte[] data, float time) : base(data, time)
         {
             readByte("cmd");
             readInt("netId");
@@ -155,7 +155,7 @@ namespace PcapDecrypt.Packets
 
     public class PKT_S2C_ObjectSpawn : Packet //Minion Spawn
     {
-        public PKT_S2C_ObjectSpawn(byte[] bytes) : base(bytes)
+        public PKT_S2C_ObjectSpawn(byte[] bytes, float time) : base(bytes, time)
         {
             readByte("cmd");
             readInt("netId");
@@ -235,7 +235,7 @@ namespace PcapDecrypt.Packets
 
     class PKT_S2C_SpellAnimation : Packet
     {
-        public PKT_S2C_SpellAnimation(byte[] bytes) : base(bytes)
+        public PKT_S2C_SpellAnimation(byte[] bytes, float time) : base(bytes, time)
         {
             readByte("cmd");
             readInt("netId");
@@ -250,7 +250,7 @@ namespace PcapDecrypt.Packets
 
     class PKT_S2C_SetAnimation : Packet
     {
-        public PKT_S2C_SetAnimation(byte[] bytes) : base(bytes)
+        public PKT_S2C_SetAnimation(byte[] bytes, float time) : base(bytes, time)
         {
             readByte("cmd");
             readInt("netId");
@@ -269,7 +269,7 @@ namespace PcapDecrypt.Packets
 
     public class PKT_S2C_FaceDirection : Packet
     {
-        public PKT_S2C_FaceDirection(byte[] bytes) : base(bytes)
+        public PKT_S2C_FaceDirection(byte[] bytes, float time) : base(bytes, time)
         {
             readByte("cmd");
             readInt("netId");
@@ -284,7 +284,7 @@ namespace PcapDecrypt.Packets
 
     public class PKT_S2C_FloatingText : Packet
     {
-        public PKT_S2C_FloatingText(byte[] bytes) : base(bytes)
+        public PKT_S2C_FloatingText(byte[] bytes, float time) : base(bytes, time)
         {
             readByte("cmd");
             close();
@@ -293,7 +293,7 @@ namespace PcapDecrypt.Packets
 
     public class PKT_S2C_Dash : Packet
     {
-        public PKT_S2C_Dash(byte[] bytes) : base(bytes)
+        public PKT_S2C_Dash(byte[] bytes, float time) : base(bytes, time)
         {
             readByte("cmd");
             readInt("netId");
@@ -322,7 +322,7 @@ namespace PcapDecrypt.Packets
 
     public class PKT_S2C_LeaveVision : Packet
     {
-        public PKT_S2C_LeaveVision(byte[] bytes) : base(bytes)
+        public PKT_S2C_LeaveVision(byte[] bytes, float time) : base(bytes, time)
         {
             readByte("cmd");
             readInt("netId");
@@ -332,7 +332,7 @@ namespace PcapDecrypt.Packets
 
     public class PKT_S2C_DeleteObject : Packet
     {
-        public PKT_S2C_DeleteObject(byte[] bytes) : base(bytes)
+        public PKT_S2C_DeleteObject(byte[] bytes, float time) : base(bytes, time)
         {
             readByte("cmd");
             readInt("netId");
@@ -342,7 +342,7 @@ namespace PcapDecrypt.Packets
 
     public class AddGold : Packet
     {
-        public AddGold(byte[] bytes) : base(bytes)
+        public AddGold(byte[] bytes, float time) : base(bytes, time)
         {
             readByte("cmd");
             readInt("netId");
@@ -355,7 +355,7 @@ namespace PcapDecrypt.Packets
 
     public class PKT_C2S_MoveReq : Packet
     {
-        public PKT_C2S_MoveReq(byte[] data) : base(data)
+        public PKT_C2S_MoveReq(byte[] data, float time) : base(data, time)
         {
             readByte("cmd");
             readInt("netId");
@@ -372,7 +372,7 @@ namespace PcapDecrypt.Packets
 
     public class PKT_S2C_MoveAns : Packet
     {
-        public PKT_S2C_MoveAns(byte[] bytes) : base(bytes)
+        public PKT_S2C_MoveAns(byte[] bytes, float time) : base(bytes, time)
         {
             readByte("cmd");
             readInt("netId");
@@ -407,7 +407,7 @@ namespace PcapDecrypt.Packets
 
     public class PKT_S2C_QueryStatusAns : Packet
     {
-        public PKT_S2C_QueryStatusAns(byte[] bytes) : base(bytes)
+        public PKT_S2C_QueryStatusAns(byte[] bytes, float time) : base(bytes, time)
         {
             readByte("cmd");
             readInt("netId");
@@ -418,7 +418,7 @@ namespace PcapDecrypt.Packets
 
     public class PKT_C2S_QueryStatusReq : Packet
     {
-        public PKT_C2S_QueryStatusReq(byte[] bytes) : base(bytes)
+        public PKT_C2S_QueryStatusReq(byte[] bytes, float time) : base(bytes, time)
         {
             readByte("cmd");
             readInt("netId");
@@ -433,7 +433,7 @@ namespace PcapDecrypt.Packets
         public int unk1;
         private byte[] _version = new byte[256]; // version string might be shorter?
 
-        public PKT_C2S_SynchVersion(byte[] data) : base(data)
+        public PKT_C2S_SynchVersion(byte[] data, float time) : base(data, time)
         {
             readByte("cmd");
             readInt("netId");
@@ -445,7 +445,7 @@ namespace PcapDecrypt.Packets
 
     public class PKT_S2C_World_SendGameNumber : Packet
     {
-        public PKT_S2C_World_SendGameNumber(byte[] bytes) : base(bytes)
+        public PKT_S2C_World_SendGameNumber(byte[] bytes, float time) : base(bytes, time)
         {
             readByte("cmd");
             readInt("netId");
@@ -458,7 +458,7 @@ namespace PcapDecrypt.Packets
     //app crash inc
     public class PKT_C2S_StatsConfirm : Packet
     {
-        public PKT_C2S_StatsConfirm(byte[] bytes) : base(bytes)
+        public PKT_C2S_StatsConfirm(byte[] bytes, float time) : base(bytes, time)
         {
             readByte("cmd");
             readInt("netId");
@@ -481,7 +481,7 @@ namespace PcapDecrypt.Packets
 
     public class PKT_C2S_ChatBoxMessage : Packet
     {
-        public PKT_C2S_ChatBoxMessage(byte[] data) : base(data)
+        public PKT_C2S_ChatBoxMessage(byte[] data, float time) : base(data, time)
         {
             var Reader = new BinaryReader(new MemoryStream(data));
             readByte("cmd");
@@ -499,7 +499,7 @@ namespace PcapDecrypt.Packets
 
     public class PKT_S2C_UpdateModel : Packet
     {
-        public PKT_S2C_UpdateModel(byte[] bytes) : base(bytes)
+        public PKT_S2C_UpdateModel(byte[] bytes, float time) : base(bytes, time)
         {
             readByte("cmd");
             readInt("netId");
@@ -513,7 +513,7 @@ namespace PcapDecrypt.Packets
 
     public class PKT_S2C_EditBuff : Packet
     {
-        public PKT_S2C_EditBuff(byte[] bytes) : base(bytes)
+        public PKT_S2C_EditBuff(byte[] bytes, float time) : base(bytes, time)
         {
             readByte("cmd");
             close();
@@ -522,7 +522,7 @@ namespace PcapDecrypt.Packets
 
     public class PKT_S2C_EndSpawn : Packet
     {
-        public PKT_S2C_EndSpawn(byte[] bytes) : base(bytes)
+        public PKT_S2C_EndSpawn(byte[] bytes, float time) : base(bytes, time)
         {
             readByte("cmd");
             readInt("netId");
@@ -531,14 +531,14 @@ namespace PcapDecrypt.Packets
     }
     public class PKT_S2C_StartGame : PKT_S2C_EndSpawn
     {
-        public PKT_S2C_StartGame(byte[] bytes) : base(bytes)
+        public PKT_S2C_StartGame(byte[] bytes, float time) : base(bytes, time)
         {
         }
     }
 
     public class PKT_S2C_StartSpawn : Packet
     {
-        public PKT_S2C_StartSpawn(byte[] bytes) : base(bytes)
+        public PKT_S2C_StartSpawn(byte[] bytes, float time) : base(bytes, time)
         {
             readByte("cmd");
             readInt("netId");
@@ -564,7 +564,7 @@ namespace PcapDecrypt.Packets
 
     public class Click : Packet
     {
-        public Click(byte[] data) : base(data)
+        public Click(byte[] data, float time) : base(data, time)
         {
             readByte("cmd");
             readInt("netId");
@@ -576,7 +576,7 @@ namespace PcapDecrypt.Packets
 
     public class PKT_S2C_HeroSpawn : Packet
     {
-        public PKT_S2C_HeroSpawn(byte[] bytes) : base(bytes)
+        public PKT_S2C_HeroSpawn(byte[] bytes, float time) : base(bytes, time)
         {
             readByte("cmd");
             readInt("netId");
@@ -600,7 +600,7 @@ namespace PcapDecrypt.Packets
 
     public class PKT_S2C_TurretSpawn : Packet
     {
-        public PKT_S2C_TurretSpawn(byte[] b) : base(b)
+        public PKT_S2C_TurretSpawn(byte[] b, float time) : base(b, time)
         {
             readByte("cmd");
             readInt("netId");
@@ -619,7 +619,7 @@ namespace PcapDecrypt.Packets
 
     public class PKT_S2C_GameEnd : Packet
     {
-        public PKT_S2C_GameEnd(byte[] bytes) : base(bytes)
+        public PKT_S2C_GameEnd(byte[] bytes, float time) : base(bytes, time)
         {
             readByte("cmd");
             readInt("netId");
@@ -630,7 +630,7 @@ namespace PcapDecrypt.Packets
 
     public class PKT_S2C_GameTimer : Packet
     {
-        public PKT_S2C_GameTimer(byte[] bytes) : base(bytes)
+        public PKT_S2C_GameTimer(byte[] bytes, float time) : base(bytes, time)
         {
             readByte("cmd");
             readInt("netId");
@@ -641,7 +641,7 @@ namespace PcapDecrypt.Packets
 
     public class PKT_S2C_GameTimerUpdate : Packet
     {
-        public PKT_S2C_GameTimerUpdate(byte[] bytes) : base(bytes)
+        public PKT_S2C_GameTimerUpdate(byte[] bytes, float time) : base(bytes, time)
         {
             readByte("cmd");
             readInt("netId");
@@ -651,7 +651,7 @@ namespace PcapDecrypt.Packets
 
     public class PKT_C2S_HeartBeat : Packet
     {
-        public PKT_C2S_HeartBeat(byte[] data) : base(data)
+        public PKT_C2S_HeartBeat(byte[] data, float time) : base(data, time)
         {
             readByte("cmd");
             readInt("netId");
@@ -681,7 +681,7 @@ namespace PcapDecrypt.Packets
         public PacketCmdC2S cmd;
         public int netId;
         public byte skill;
-        public PKT_C2S_SkillUp(byte[] bytes) : base(bytes)
+        public PKT_C2S_SkillUp(byte[] bytes, float time) : base(bytes, time)
         {
             readByte("cmd");
             readInt("netId");
@@ -691,7 +691,7 @@ namespace PcapDecrypt.Packets
     }
     public class PKT_S2C_SkillUp : Packet
     {
-        public PKT_S2C_SkillUp(byte[] bytes) : base(bytes)
+        public PKT_S2C_SkillUp(byte[] bytes, float time) : base(bytes, time)
         {
             readByte("cmd");
             readInt("netId");
@@ -704,7 +704,7 @@ namespace PcapDecrypt.Packets
 
     public class PKT_S2C_Batch : Packet
     {
-        public PKT_S2C_Batch(byte[] bytes) : base(bytes)
+        public PKT_S2C_Batch(byte[] bytes, float time) : base(bytes, time)
         {
             readByte("cmd");
             readByte("packetCount");
@@ -718,7 +718,7 @@ namespace PcapDecrypt.Packets
 
     public class PKT_C2S_BuyItemReq : Packet
     {
-        public PKT_C2S_BuyItemReq(byte[] bytes) : base(bytes)
+        public PKT_C2S_BuyItemReq(byte[] bytes, float time) : base(bytes, time)
         {
             readByte("cmd");
             readInt("netId");
@@ -729,7 +729,7 @@ namespace PcapDecrypt.Packets
 
     public class PKT_S2C_BuyItemAns : Packet
     {
-        public PKT_S2C_BuyItemAns(byte[] bytes) : base(bytes)
+        public PKT_S2C_BuyItemAns(byte[] bytes, float time) : base(bytes, time)
         {
             readByte("cmd");
             readInt("netId");
@@ -744,7 +744,7 @@ namespace PcapDecrypt.Packets
 
     public class PKT_C2S_SellItem : Packet
     {
-        public PKT_C2S_SellItem(byte[] bytes) : base(bytes)
+        public PKT_C2S_SellItem(byte[] bytes, float time) : base(bytes, time)
         {
             readByte("cmd");
             readInt("netId");
@@ -756,7 +756,7 @@ namespace PcapDecrypt.Packets
 
     public class PKT_S2C_RemoveItem : Packet
     {
-        public PKT_S2C_RemoveItem(byte[] bytes) : base(bytes)
+        public PKT_S2C_RemoveItem(byte[] bytes, float time) : base(bytes, time)
         {
             readByte("cmd");
             readInt("netId");
@@ -767,7 +767,7 @@ namespace PcapDecrypt.Packets
 
     public class PKT_C2S_Emotion : Packet
     {
-        public PKT_C2S_Emotion(byte[] bytes) : base(bytes)
+        public PKT_C2S_Emotion(byte[] bytes, float time) : base(bytes, time)
         {
             readByte("cmd");
             readInt("netId");
@@ -777,7 +777,7 @@ namespace PcapDecrypt.Packets
     }
     public class PKT_S2C_Emotion : PKT_C2S_Emotion
     {
-        public PKT_S2C_Emotion(byte[] bytes) : base(bytes)
+        public PKT_S2C_Emotion(byte[] bytes, float time) : base(bytes, time)
         {
 
         }
@@ -785,7 +785,7 @@ namespace PcapDecrypt.Packets
 
     public class PKT_S2C_Extended : Packet
     {
-        public PKT_S2C_Extended(byte[] bytes) : base(bytes)
+        public PKT_S2C_Extended(byte[] bytes, float time) : base(bytes, time)
         {
             readByte("cmd");
             readInt("netId");
@@ -797,7 +797,7 @@ namespace PcapDecrypt.Packets
 
     public class PKT_C2S_SwapItems : Packet
     {
-        public PKT_C2S_SwapItems(byte[] bytes) : base(bytes)
+        public PKT_C2S_SwapItems(byte[] bytes, float time) : base(bytes, time)
         {
             readByte("cmd");
             readInt("netId");
@@ -809,14 +809,14 @@ namespace PcapDecrypt.Packets
 
     public class PKT_S2C_SwapItems : PKT_C2S_SwapItems
     {
-        public PKT_S2C_SwapItems(byte[] bytes) : base(bytes)
+        public PKT_S2C_SwapItems(byte[] bytes, float time) : base(bytes, time)
         {
         }
     }
 
     class PKT_S2C_Announce : Packet
     {
-        public PKT_S2C_Announce(byte[] bytes) : base(bytes)
+        public PKT_S2C_Announce(byte[] bytes, float time) : base(bytes, time)
         {
             readByte("cmd");
             readInt("netId");
@@ -830,7 +830,7 @@ namespace PcapDecrypt.Packets
 
     public class PKT_S2C_AddBuff : Packet
     {
-        public PKT_S2C_AddBuff(byte[] bytes) : base(bytes)
+        public PKT_S2C_AddBuff(byte[] bytes, float time) : base(bytes, time)
         {
             readByte("cmd");
             readInt("targetNetId");
@@ -849,7 +849,7 @@ namespace PcapDecrypt.Packets
 
     public class PKT_S2C_RemoveBuff : Packet
     {
-        public PKT_S2C_RemoveBuff(byte[] bytes) : base(bytes)
+        public PKT_S2C_RemoveBuff(byte[] bytes, float time) : base(bytes, time)
         {
             readByte("cmd");
             readInt("netId");
@@ -862,7 +862,7 @@ namespace PcapDecrypt.Packets
 
     public class PKT_S2C_DamageDone : Packet
     {
-        public PKT_S2C_DamageDone(byte[] bytes) : base(bytes)
+        public PKT_S2C_DamageDone(byte[] bytes, float time) : base(bytes, time)
         {
             readByte("cmd");
             readInt("netId");
@@ -877,7 +877,7 @@ namespace PcapDecrypt.Packets
 
     public class EPKT_S2C_NPC_Die : Packet
     {
-        public EPKT_S2C_NPC_Die(byte[] bytes) : base(bytes)
+        public EPKT_S2C_NPC_Die(byte[] bytes, float time) : base(bytes, time)
         {
             readByte("cmd");
             readInt("killedNetId");
@@ -895,7 +895,7 @@ namespace PcapDecrypt.Packets
 
     public class PKT_S2C_LoadName : Packet
     {
-        public PKT_S2C_LoadName(byte[] bytes) : base(bytes)
+        public PKT_S2C_LoadName(byte[] bytes, float time) : base(bytes, time)
         {
             readByte("cmd");
             readLong("userId");
@@ -908,7 +908,7 @@ namespace PcapDecrypt.Packets
 
     public class PKT_S2C_LoadHero : Packet
     {
-        public PKT_S2C_LoadHero(byte[] bytes) : base(bytes)
+        public PKT_S2C_LoadHero(byte[] bytes, float time) : base(bytes, time)
         {
             readByte("cmd");
             readLong("userId");
@@ -921,7 +921,7 @@ namespace PcapDecrypt.Packets
 
     public class PKT_C2S_AttentionPing : Packet
     {
-        public PKT_C2S_AttentionPing(byte[] bytes) : base(bytes)
+        public PKT_C2S_AttentionPing(byte[] bytes, float time) : base(bytes, time)
         {
             readByte("cmd");
             readInt("unk");
@@ -935,7 +935,7 @@ namespace PcapDecrypt.Packets
 
     public class PKT_S2C_AttentionPing : Packet
     {
-        public PKT_S2C_AttentionPing(byte[] bytes) : base(bytes)
+        public PKT_S2C_AttentionPing(byte[] bytes, float time) : base(bytes, time)
         {
             readByte("cmd");
             readInt("netId");
@@ -951,7 +951,7 @@ namespace PcapDecrypt.Packets
 
     public class PKT_S2C_BeginAutoAttack : Packet
     {
-        public PKT_S2C_BeginAutoAttack(byte[] bytes) : base(bytes)
+        public PKT_S2C_BeginAutoAttack(byte[] bytes, float time) : base(bytes, time)
         {
             readByte("cmd");
             readInt("attackerNetId");
@@ -977,7 +977,7 @@ namespace PcapDecrypt.Packets
 
     public class PKT_S2C_NextAutoAttack : Packet
     {
-        public PKT_S2C_NextAutoAttack(byte[] bytes) : base(bytes)
+        public PKT_S2C_NextAutoAttack(byte[] bytes, float time) : base(bytes, time)
         {
             readByte("cmd");
             readInt("netId");
@@ -1003,7 +1003,7 @@ namespace PcapDecrypt.Packets
 
     public class PKT_S2C_StopAutoAttack : Packet
     {
-        public PKT_S2C_StopAutoAttack(byte[] bytes) : base(bytes)
+        public PKT_S2C_StopAutoAttack(byte[] bytes, float time) : base(bytes, time)
         {
             readByte("cmd");
             readInt("netId");
@@ -1015,7 +1015,7 @@ namespace PcapDecrypt.Packets
 
     public class PKT_S2C_Surrender : Packet
     {
-        public PKT_S2C_Surrender(byte[] bytes) : base(bytes)
+        public PKT_S2C_Surrender(byte[] bytes, float time) : base(bytes, time)
         {
             readByte("cmd");
             readInt("netId");
@@ -1030,7 +1030,7 @@ namespace PcapDecrypt.Packets
     }
     public class PKT_S2C_SurrenderResult : Packet
     {
-        public PKT_S2C_SurrenderResult(byte[] bytes) : base(bytes)
+        public PKT_S2C_SurrenderResult(byte[] bytes, float time) : base(bytes, time)
         {
             readByte("cmd");
             readInt("netId");
@@ -1044,7 +1044,7 @@ namespace PcapDecrypt.Packets
 
     public class EPKT_S2C_OnAttack : Packet
     {
-        public EPKT_S2C_OnAttack(byte[] bytes) : base(bytes)
+        public EPKT_S2C_OnAttack(byte[] bytes, float time) : base(bytes, time)
         {
             readByte("cmd");
             readInt("netId");
@@ -1061,7 +1061,7 @@ namespace PcapDecrypt.Packets
 
     public class PKT_S2C_SetCooldown : Packet
     {
-        public PKT_S2C_SetCooldown(byte[] bytes) : base(bytes)
+        public PKT_S2C_SetCooldown(byte[] bytes, float time) : base(bytes, time)
         {
             readByte("cmd");
             readInt("netId");
@@ -1076,7 +1076,7 @@ namespace PcapDecrypt.Packets
 
     public class PKT_S2C_SetTarget : Packet
     {
-        public PKT_S2C_SetTarget(byte[] bytes) : base(bytes)
+        public PKT_S2C_SetTarget(byte[] bytes, float time) : base(bytes, time)
         {
             readByte("cmd");
             readInt("attackerNetId");
@@ -1088,7 +1088,7 @@ namespace PcapDecrypt.Packets
 
     public class PKT_S2C_SetTarget2 : PKT_S2C_SetTarget
     {
-        public PKT_S2C_SetTarget2(byte[] bytes) : base(bytes)
+        public PKT_S2C_SetTarget2(byte[] bytes, float time) : base(bytes, time)
         {
 
         }
@@ -1098,7 +1098,7 @@ namespace PcapDecrypt.Packets
     public class PKT_S2C_ChampionDie : Packet
     {
 
-        public PKT_S2C_ChampionDie(byte[] bytes) : base(bytes)
+        public PKT_S2C_ChampionDie(byte[] bytes, float time) : base(bytes, time)
         {
             readByte("cmd");
             readInt("killedNetId");
@@ -1115,7 +1115,7 @@ namespace PcapDecrypt.Packets
     public class EPKT_S2C_ChampionDeathTimer : Packet
     {
 
-        public EPKT_S2C_ChampionDeathTimer(byte[] bytes) : base(bytes)
+        public EPKT_S2C_ChampionDeathTimer(byte[] bytes, float time) : base(bytes, time)
         {
             readByte("cmd");
             readInt("netId");
@@ -1128,7 +1128,7 @@ namespace PcapDecrypt.Packets
 
     public class PKT_S2C_ChampionRespawn : Packet
     {
-        public PKT_S2C_ChampionRespawn(byte[] bytes) : base(bytes)
+        public PKT_S2C_ChampionRespawn(byte[] bytes, float time) : base(bytes, time)
         {
             readByte("cmd");
             readInt("netId");
@@ -1141,7 +1141,7 @@ namespace PcapDecrypt.Packets
 
     public class PKT_S2C_ShowProjectile : Packet
     {
-        public PKT_S2C_ShowProjectile(byte[] bytes) : base(bytes)
+        public PKT_S2C_ShowProjectile(byte[] bytes, float time) : base(bytes, time)
         {
             readByte("cmd");
             readInt("ownerNetId");
@@ -1152,7 +1152,7 @@ namespace PcapDecrypt.Packets
 
     public class PKT_S2C_SetHealth : Packet
     {
-        public PKT_S2C_SetHealth(byte[] bytes) : base(bytes)
+        public PKT_S2C_SetHealth(byte[] bytes, float time) : base(bytes, time)
         {
             readByte("cmd");
             readUInt("netId/itemHash");
@@ -1168,7 +1168,7 @@ namespace PcapDecrypt.Packets
 
     public class PKT_C2S_CastSpell : Packet
     {
-        public PKT_C2S_CastSpell(byte[] bytes) : base(bytes)
+        public PKT_C2S_CastSpell(byte[] bytes, float time) : base(bytes, time)
         {
             readByte("cmd");
             readInt("netId");
@@ -1186,7 +1186,7 @@ namespace PcapDecrypt.Packets
     public class PKT_S2C_CastSpellAns : Packet
     {
 
-        public PKT_S2C_CastSpellAns(byte[] bytes) : base(bytes)
+        public PKT_S2C_CastSpellAns(byte[] bytes, float time) : base(bytes, time)
         {
             readByte("cmd");
             readInt("netId");
@@ -1228,7 +1228,7 @@ namespace PcapDecrypt.Packets
 
     public class PKT_S2C_PlayerInfo : Packet
     {
-        public PKT_S2C_PlayerInfo(byte[] bytes) : base(bytes)
+        public PKT_S2C_PlayerInfo(byte[] bytes, float time) : base(bytes, time)
         {
             readByte("cmd");
             readInt("netId");
@@ -1768,7 +1768,7 @@ namespace PcapDecrypt.Packets
     public class PKT_S2C_SpawnProjectile : Packet
     {
 
-        public PKT_S2C_SpawnProjectile(byte[] bytes) : base(bytes)
+        public PKT_S2C_SpawnProjectile(byte[] bytes, float time) : base(bytes, time)
         {
             readByte("cmd");
             readInt("netId");
@@ -1833,7 +1833,7 @@ namespace PcapDecrypt.Packets
 
     public class PKT_S2C_SpawnParticle : Packet
     {
-        public PKT_S2C_SpawnParticle(byte[] bytes) : base(bytes)
+        public PKT_S2C_SpawnParticle(byte[] bytes, float time) : base(bytes, time)
         {
             readByte("cmd");
             readInt("ownerNetId");
@@ -1868,7 +1868,7 @@ namespace PcapDecrypt.Packets
 
     public class PKT_S2C_DestroyProjectile : Packet
     {
-        public PKT_S2C_DestroyProjectile(byte[] bytes) : base(bytes)
+        public PKT_S2C_DestroyProjectile(byte[] bytes, float time) : base(bytes, time)
         {
             readByte("cmd");
             readInt("netId");
@@ -1877,7 +1877,7 @@ namespace PcapDecrypt.Packets
         /*
                 public class PKT_S2C_CharStats : Packet
                 {
-                    public PKT_S2C_CharStats(byte[] bytes) : base(bytes)
+                    public PKT_S2C_CharStats(byte[] bytes, float time) : base(bytes, time)
                     {
                         readByte("cmd");
                         readInt("netId");
@@ -1937,7 +1937,7 @@ namespace PcapDecrypt.Packets
                 */
     public class PKT_S2C_LevelPropSpawn : Packet
     {
-        public PKT_S2C_LevelPropSpawn(byte[] bytes) : base(bytes)
+        public PKT_S2C_LevelPropSpawn(byte[] bytes, float time) : base(bytes, time)
         {
             readByte("cmd");
             readInt("netId");
@@ -1968,7 +1968,7 @@ namespace PcapDecrypt.Packets
 
     public class PKT_C2S_ViewReq : Packet
     {
-        public PKT_C2S_ViewReq(byte[] bytes) : base(bytes)
+        public PKT_C2S_ViewReq(byte[] bytes, float time) : base(bytes, time)
         {
             readByte("cmd");
             readInt("netId");
@@ -1986,7 +1986,7 @@ namespace PcapDecrypt.Packets
 
     public class PKT_S2C_LevelUp : Packet
     {
-        public PKT_S2C_LevelUp(byte[] bytes) : base(bytes)
+        public PKT_S2C_LevelUp(byte[] bytes, float time) : base(bytes, time)
         {
             readByte("cmd");
             readInt("netId");
@@ -1998,7 +1998,7 @@ namespace PcapDecrypt.Packets
 
     public class PKT_S2C_ViewAns : Packet
     {
-        public PKT_S2C_ViewAns(byte[] bytes) : base(bytes)
+        public PKT_S2C_ViewAns(byte[] bytes, float time) : base(bytes, time)
         {
             readByte("cmd");
             readInt("netId");
@@ -2009,7 +2009,7 @@ namespace PcapDecrypt.Packets
 
     public class PKT_S2C_DebugMessage : Packet
     {
-        public PKT_S2C_DebugMessage(byte[] bytes) : base(bytes)
+        public PKT_S2C_DebugMessage(byte[] bytes, float time) : base(bytes, time)
         {
             readByte("cmd");
             readInt("netId");
@@ -2021,7 +2021,7 @@ namespace PcapDecrypt.Packets
 
     public class SetCooldown : Packet
     {
-        public SetCooldown(byte[] bytes) : base(bytes)
+        public SetCooldown(byte[] bytes, float time) : base(bytes, time)
         {
             readByte("cmd");
             readInt("netId");

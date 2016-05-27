@@ -175,11 +175,11 @@ namespace PcapDecrypt
 
             if (!filtering)
             {
-                PacketList.Add(new Packets.Packet(e.Packet.Data));
+                PacketList.Add(new Packets.Packet(e.Packet.Data, e.Packet.Timeval.Miliseconds));
             }
             if (filtering && e.Packet.Data[0] == filter)
             {
-                PacketList.Add(new Packets.Packet(e.Packet.Data));
+                PacketList.Add(new Packets.Packet(e.Packet.Data, e.Packet.Timeval.Miliseconds));
             }
         }
 
@@ -269,11 +269,11 @@ namespace PcapDecrypt
             */
             if (!filtering)
             {
-                PacketList.Add(new Packets.Packet(decrypted));
+                PacketList.Add(new Packets.Packet(decrypted, time));
             }
             if (filtering && (decrypted[0] == filter))
             {
-                PacketList.Add(new Packets.Packet(decrypted));
+                PacketList.Add(new Packets.Packet(decrypted, time));
             }
 
             if (decrypted[0] == 0xFF)
@@ -284,7 +284,7 @@ namespace PcapDecrypt
                     decodeBatch(decrypted, time, C2S);
                     if (toAdd)
                     {
-                        PacketList.Add(new Packets.Packet(decrypted));
+                        PacketList.Add(new Packets.Packet(decrypted, time));
                     }
                 }
                 catch
@@ -295,140 +295,140 @@ namespace PcapDecrypt
             }
         }
 
-        public static Packets.Packet CreatePacket(byte[] bytes)
+        public static Packets.Packet CreatePacket(byte[] bytes, float time)
         {
             switch ((PacketCmdS2C)bytes[0]) // This looks horrible, don't hate me please :3
             {
                 case PacketCmdS2C.PKT_S2C_AddBuff:
-                    return new PKT_S2C_AddBuff(bytes);
+                    return new PKT_S2C_AddBuff(bytes, time);
                 case PacketCmdS2C.PKT_S2C_Announce:
-                    return new PKT_S2C_Announce(bytes);
+                    return new PKT_S2C_Announce(bytes, time);
                 case PacketCmdS2C.PKT_S2C_AttentionPing:
-                    return new PKT_S2C_AttentionPing(bytes);
+                    return new PKT_S2C_AttentionPing(bytes, time);
                 case PacketCmdS2C.PKT_S2C_Batch:
-                    return new PKT_S2C_Batch(bytes);
+                    return new PKT_S2C_Batch(bytes, time);
                 case PacketCmdS2C.PKT_S2C_BeginAutoAttack:
-                    return new PKT_S2C_BeginAutoAttack(bytes);
+                    return new PKT_S2C_BeginAutoAttack(bytes, time);
                 case PacketCmdS2C.PKT_S2C_BuyItemAns:
-                    return new PKT_S2C_BuyItemAns(bytes);
+                    return new PKT_S2C_BuyItemAns(bytes, time);
                 case PacketCmdS2C.PKT_S2C_CastSpellAns:
-                    return new PKT_S2C_CastSpellAns(bytes);
+                    return new PKT_S2C_CastSpellAns(bytes, time);
                 case PacketCmdS2C.PKT_S2C_ChampionDie:
-                    return new PKT_S2C_ChampionDie(bytes);
+                    return new PKT_S2C_ChampionDie(bytes, time);
                 case PacketCmdS2C.PKT_S2C_ChampionRespawn:
-                    return new PKT_S2C_ChampionRespawn(bytes);
+                    return new PKT_S2C_ChampionRespawn(bytes, time);
                 case PacketCmdS2C.PKT_S2C_CharStats:
-                    //return new PKT_S2C_CharStats(bytes);
+                    //return new PKT_S2C_CharStats(bytes, time);
                 case PacketCmdS2C.PKT_S2C_ChatBoxMessage:
-                    return new PKT_C2S_ChatBoxMessage(bytes);
+                    return new PKT_C2S_ChatBoxMessage(bytes, time);
                 case PacketCmdS2C.PKT_S2C_DamageDone:
-                    return new PKT_S2C_DamageDone(bytes);
+                    return new PKT_S2C_DamageDone(bytes, time);
                 case PacketCmdS2C.PKT_S2C_Dash:
-                    return new PKT_S2C_Dash(bytes);
+                    return new PKT_S2C_Dash(bytes, time);
                 case PacketCmdS2C.PKT_S2C_DebugMessage:
-                    return new PKT_S2C_DebugMessage(bytes);
+                    return new PKT_S2C_DebugMessage(bytes, time);
                 case PacketCmdS2C.PKT_S2C_DeleteObject:
-                    return new PKT_S2C_DeleteObject(bytes);
+                    return new PKT_S2C_DeleteObject(bytes, time);
                 case PacketCmdS2C.PKT_S2C_DestroyProjectile:
-                    return new PKT_S2C_DestroyProjectile(bytes);
+                    return new PKT_S2C_DestroyProjectile(bytes, time);
                 case PacketCmdS2C.PKT_S2C_EditBuff:
-                    return new PKT_S2C_EditBuff(bytes);
+                    return new PKT_S2C_EditBuff(bytes, time);
                 case PacketCmdS2C.PKT_S2C_Emotion:
-                    return new PKT_S2C_Emotion(bytes);
+                    return new PKT_S2C_Emotion(bytes, time);
                 case PacketCmdS2C.PKT_S2C_EndSpawn:
-                    return new PKT_S2C_EndSpawn(bytes);
+                    return new PKT_S2C_EndSpawn(bytes, time);
                 case PacketCmdS2C.PKT_S2C_Extended:
-                    return new PKT_S2C_Extended(bytes);
+                    return new PKT_S2C_Extended(bytes, time);
                 case PacketCmdS2C.PKT_S2C_FaceDirection:
-                    return new PKT_S2C_FaceDirection(bytes);
+                    return new PKT_S2C_FaceDirection(bytes, time);
                 case PacketCmdS2C.PKT_S2C_FloatingText:
-                    return new PKT_S2C_FloatingText(bytes);
+                    return new PKT_S2C_FloatingText(bytes, time);
                 case PacketCmdS2C.PKT_S2C_FogUpdate2:
-                    //return new PKT_S2C_FogUpdate2(bytes);
+                    //return new PKT_S2C_FogUpdate2(bytes, time);
                 case PacketCmdS2C.PKT_S2C_GameEnd:
-                    return new PKT_S2C_GameEnd(bytes);
+                    return new PKT_S2C_GameEnd(bytes, time);
                 case PacketCmdS2C.PKT_S2C_GameTimer:
-                    return new PKT_S2C_GameTimer(bytes);
+                    return new PKT_S2C_GameTimer(bytes, time);
                 case PacketCmdS2C.PKT_S2C_GameTimerUpdate:
-                    return new PKT_S2C_GameTimerUpdate(bytes);
+                    return new PKT_S2C_GameTimerUpdate(bytes, time);
                 case PacketCmdS2C.PKT_S2C_HeroSpawn:
-                    return new PKT_S2C_HeroSpawn(bytes);
+                    return new PKT_S2C_HeroSpawn(bytes, time);
                 case PacketCmdS2C.PKT_S2C_KeyCheck:
-                    return new PKT_S2C_KeyCheck(bytes);
+                    return new PKT_S2C_KeyCheck(bytes, time);
                 case PacketCmdS2C.PKT_S2C_LeaveVision:
-                    return new PKT_S2C_LeaveVision(bytes);
+                    return new PKT_S2C_LeaveVision(bytes, time);
                 case PacketCmdS2C.PKT_S2C_LevelPropSpawn:
-                    return new PKT_S2C_LevelPropSpawn(bytes);
+                    return new PKT_S2C_LevelPropSpawn(bytes, time);
                 case PacketCmdS2C.PKT_S2C_LevelUp:
-                    return new PKT_S2C_LevelUp(bytes);
+                    return new PKT_S2C_LevelUp(bytes, time);
                 /*case PacketCmdS2C.PKT_S2C_LoadHero:
-                    return new PKT_S2C_LoadHero(bytes);*/
+                    return new PKT_S2C_LoadHero(bytes, time);*/
                 case PacketCmdS2C.PKT_S2C_LoadName:
-                    return new PKT_S2C_LoadName(bytes);
+                    return new PKT_S2C_LoadName(bytes, time);
                 case PacketCmdS2C.PKT_S2C_LoadScreenInfo:
-                    return new PKT_S2C_LoadScreenInfo(bytes);
+                    return new PKT_S2C_LoadScreenInfo(bytes, time);
                 case PacketCmdS2C.PKT_S2C_MoveAns:
-                    return new PKT_S2C_MoveAns(bytes);
+                    return new PKT_S2C_MoveAns(bytes, time);
                 case PacketCmdS2C.PKT_S2C_NextAutoAttack:
-                    return new PKT_S2C_NextAutoAttack(bytes);
+                    return new PKT_S2C_NextAutoAttack(bytes, time);
                 case PacketCmdS2C.PKT_S2C_NPC_Hide:
-                    //return new PKT_S2C_NPC_Hide(bytes);
+                    //return new PKT_S2C_NPC_Hide(bytes, time);
                 case PacketCmdS2C.PKT_S2C_ObjectSpawn:
-                    return new PKT_S2C_ObjectSpawn(bytes);
+                    return new PKT_S2C_ObjectSpawn(bytes, time);
                 case PacketCmdS2C.PKT_S2C_Ping_Load_Info:
-                    return new PKT_S2C_Ping_Load_Info(bytes);
+                    return new PKT_S2C_Ping_Load_Info(bytes, time);
                 case PacketCmdS2C.PKT_S2C_PlayerInfo:
-                    return new PKT_S2C_PlayerInfo(bytes);
+                    return new PKT_S2C_PlayerInfo(bytes, time);
                 case PacketCmdS2C.PKT_S2C_QueryStatusAns:
-                    return new PKT_S2C_QueryStatusAns(bytes);
+                    return new PKT_S2C_QueryStatusAns(bytes, time);
                 case PacketCmdS2C.PKT_S2C_RemoveBuff:
-                    return new PKT_S2C_RemoveBuff(bytes);
+                    return new PKT_S2C_RemoveBuff(bytes, time);
                 case PacketCmdS2C.PKT_S2C_RemoveItem:
-                    return new PKT_S2C_RemoveItem(bytes);
+                    return new PKT_S2C_RemoveItem(bytes, time);
                 case PacketCmdS2C.PKT_S2C_SetAnimation:
-                    return new PKT_S2C_SetAnimation(bytes);
+                    return new PKT_S2C_SetAnimation(bytes, time);
                 case PacketCmdS2C.PKT_S2C_SetCooldown:
-                    return new PKT_S2C_SetCooldown(bytes);
+                    return new PKT_S2C_SetCooldown(bytes, time);
                 case PacketCmdS2C.PKT_S2C_SetHealth:
-                    return new PKT_S2C_SetHealth(bytes);
+                    return new PKT_S2C_SetHealth(bytes, time);
                 case PacketCmdS2C.PKT_S2C_SetTarget:
-                    return new PKT_S2C_SetTarget(bytes);
+                    return new PKT_S2C_SetTarget(bytes, time);
                 case PacketCmdS2C.PKT_S2C_SetTarget2:
-                    return new PKT_S2C_SetTarget2(bytes);
+                    return new PKT_S2C_SetTarget2(bytes, time);
                 case PacketCmdS2C.PKT_S2C_ShowProjectile:
-                    return new PKT_S2C_ShowProjectile(bytes);
+                    return new PKT_S2C_ShowProjectile(bytes, time);
                 case PacketCmdS2C.PKT_S2C_SkillUp:
-                    return new PKT_S2C_SkillUp(bytes);
+                    return new PKT_S2C_SkillUp(bytes, time);
                 case PacketCmdS2C.PKT_S2C_SpawnParticle:
-                    return new PKT_S2C_SpawnParticle(bytes);
+                    return new PKT_S2C_SpawnParticle(bytes, time);
                 case PacketCmdS2C.PKT_S2C_SpawnProjectile:
-                    return new PKT_S2C_SpawnProjectile(bytes);
+                    return new PKT_S2C_SpawnProjectile(bytes, time);
                 case PacketCmdS2C.PKT_S2C_SpellAnimation:
-                    return new PKT_S2C_SpellAnimation(bytes);
+                    return new PKT_S2C_SpellAnimation(bytes, time);
                 case PacketCmdS2C.PKT_S2C_StartGame:
-                    return new PKT_S2C_StartGame(bytes);
+                    return new PKT_S2C_StartGame(bytes, time);
                 case PacketCmdS2C.PKT_S2C_StartSpawn:
-                    return new PKT_S2C_StartSpawn(bytes);
+                    return new PKT_S2C_StartSpawn(bytes, time);
                 case PacketCmdS2C.PKT_S2C_StopAutoAttack:
-                    return new PKT_S2C_StopAutoAttack(bytes);
+                    return new PKT_S2C_StopAutoAttack(bytes, time);
                 case PacketCmdS2C.PKT_S2C_Surrender:
-                    return new PKT_S2C_Surrender(bytes);
+                    return new PKT_S2C_Surrender(bytes, time);
                 case PacketCmdS2C.PKT_S2C_SurrenderResult:
-                    return new PKT_S2C_SurrenderResult(bytes);
+                    return new PKT_S2C_SurrenderResult(bytes, time);
                 case PacketCmdS2C.PKT_S2C_SwapItems:
-                    return new PKT_S2C_SwapItems(bytes);
+                    return new PKT_S2C_SwapItems(bytes, time);
                 case PacketCmdS2C.PKT_S2C_SynchVersion:
-                    return new PKT_S2C_SynchVersion(bytes);
+                    return new PKT_S2C_SynchVersion(bytes, time);
                 case PacketCmdS2C.PKT_S2C_TurretSpawn:
-                    return new PKT_S2C_TurretSpawn(bytes);
+                    return new PKT_S2C_TurretSpawn(bytes, time);
                 case PacketCmdS2C.PKT_S2C_UpdateModel:
-                    return new PKT_S2C_UpdateModel(bytes);
+                    return new PKT_S2C_UpdateModel(bytes, time);
                 case PacketCmdS2C.PKT_S2C_ViewAns:
-                    return new PKT_S2C_ViewAns(bytes);
+                    return new PKT_S2C_ViewAns(bytes, time);
                 case PacketCmdS2C.PKT_S2C_World_SendGameNumber:
-                    return new PKT_S2C_World_SendGameNumber(bytes);
+                    return new PKT_S2C_World_SendGameNumber(bytes, time);
                 default:
-                    return new PKT_S2C_Unknown(bytes);
+                    return new PKT_S2C_Unknown(bytes, time);
             }
         }
 
@@ -482,11 +482,11 @@ namespace PcapDecrypt
                 var decrypted = decrypt(packet.ToArray());
                 if (!filtering)
                 {
-                    PacketList.Add(new Packets.Packet(decrypted));
+                    PacketList.Add(new Packets.Packet(decrypted, time));
                 }
                 if (filtering && decrypted[0] == filter)
                 {
-                    PacketList.Add(new Packets.Packet(decrypted));
+                    PacketList.Add(new Packets.Packet(decrypted, time));
                 }
                 printPacket(decrypted, time, C2S);
                 fragmentBuffer.Remove(fragmentGroup);
@@ -520,13 +520,13 @@ namespace PcapDecrypt
             {
                 toAdd = true;
                 BatchPacketList.Clear();
-                BatchPacketList.Add(new Packets.Packet(firstPacket.ToArray()));
+                BatchPacketList.Add(new Packets.Packet(firstPacket.ToArray(), time));
             }
             if (filtering && firstPacket.ToArray()[0] == filter)
             {
                 toAdd = true;
                 BatchPacketList.Clear();
-                BatchPacketList.Add(new Packets.Packet(firstPacket.ToArray()));
+                BatchPacketList.Add(new Packets.Packet(firstPacket.ToArray(), time));
             }
 
             for (int i = 2; i < packetCount + 1; i++)
@@ -565,12 +565,12 @@ namespace PcapDecrypt
                 if (!filtering)
                 {
                     toAdd = true;
-                    BatchPacketList.Add(new Packets.Packet(buffer.ToArray()));
+                    BatchPacketList.Add(new Packets.Packet(buffer.ToArray(), time));
                 }
                 if (filtering && buffer.ToArray()[0] == filter)
                 {
                     toAdd = true;
-                    BatchPacketList.Add(new Packets.Packet(buffer.ToArray()));
+                    BatchPacketList.Add(new Packets.Packet(buffer.ToArray(), time));
                 }
                 printPacket(buffer.ToArray(), time, C2S, false);
 

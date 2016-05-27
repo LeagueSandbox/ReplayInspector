@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Text;
 using System.Windows.Forms;
 
 namespace PcapDecrypt
@@ -24,7 +25,9 @@ namespace PcapDecrypt
             int index = 0;
             foreach (var Packet in Program.PacketList)
             {
-                listBox2.Items.Add(index + " cmd: " + (PacketCmdS2C)Packet.Bytes[0]);
+                var tSent = TimeSpan.FromMilliseconds(Packet.Time);
+                var time = tSent.ToString("mm\\:ss\\.ffff");
+                listBox2.Items.Add(index + " " + time + " cmd: " + (PacketCmdS2C)Packet.Bytes[0]);
                 index++;
             }
             _originalPacketList = Program.PacketList;
@@ -34,6 +37,7 @@ namespace PcapDecrypt
             {
                 comboBox1.Items.Add(PacketCommand.ToString());
             }
+            comboBox1.SelectedIndex = 0;
             Console.WriteLine("GUI loaded");
         }
 
@@ -110,14 +114,16 @@ namespace PcapDecrypt
         private void listBox2_SelectedIndexChanged(object sender, EventArgs e)
         {
             //Console.WriteLine(listBox2.SelectedIndex);
-            Program.PacketList[listBox2.SelectedIndex] = Program.CreatePacket(Program.PacketList[listBox2.SelectedIndex].Bytes);
+            Program.PacketList[listBox2.SelectedIndex] = Program.CreatePacket(Program.PacketList[listBox2.SelectedIndex].Bytes, Program.PacketList[listBox2.SelectedIndex].Time);
             listBox3.Items.Clear();
             label6.Text = "";
             listBox1.Items.Clear();
             richTextBox1.Clear();
+            textBox1.Clear();
             foreach (var b in Program.PacketList[listBox2.SelectedIndex].Bytes)
             {
                 AppendText(richTextBox1, b.ToString("X2") + " ", richTextBox1.BackColor);
+                textBox1.Text += Encoding.ASCII.GetString(new byte[] { b });
             }
 
             foreach (var PacketSection in Program.PacketList[listBox2.SelectedIndex].Payload)
@@ -139,13 +145,15 @@ namespace PcapDecrypt
         }
         private void listBox3_SelectedIndexChanged(object sender, EventArgs e)
         {
-            Program.BatchPacketList[listBox3.SelectedIndex] = Program.CreatePacket(Program.BatchPacketList[listBox3.SelectedIndex].Bytes);
+            Program.BatchPacketList[listBox3.SelectedIndex] = Program.CreatePacket(Program.BatchPacketList[listBox3.SelectedIndex].Bytes, Program.BatchPacketList[listBox3.SelectedIndex].Time);
             listBox1.Items.Clear();
             richTextBox1.Clear();
+            textBox1.Clear();
             //Console.WriteLine(listBox3.SelectedIndex);
             foreach (var b in Program.BatchPacketList[listBox3.SelectedIndex].Bytes)
             {
                 AppendText(richTextBox1, b.ToString("X2") + " ", richTextBox1.BackColor);
+                textBox1.Text += Encoding.ASCII.GetString(new byte[] { b });
             }
 
             foreach (var PacketSection in Program.BatchPacketList[listBox3.SelectedIndex].Payload)
@@ -199,7 +207,9 @@ namespace PcapDecrypt
                 int index = 0;
                 foreach (var Packet in Program.PacketList)
                 {
-                    listBox2.Items.Add(index + " cmd: " + (PacketCmdS2C)Packet.Bytes[0]);
+                    var tSent = TimeSpan.FromMilliseconds(Packet.Time);
+                    var time = tSent.ToString("mm\\:ss\\.ffff");
+                    listBox2.Items.Add(index + " " + time + " cmd: " + (PacketCmdS2C)Packet.Bytes[0]);
                     index++;
                 }
                 label5.Text = "Showing " + listBox2.Items.Count + " packets. Total: " + Program.PacketList.Count();
@@ -212,7 +222,9 @@ namespace PcapDecrypt
                 int index = 0;
                 foreach (var Packet in Program.PacketList)
                 {
-                    listBox2.Items.Add(index + " cmd: " + (PacketCmdS2C)Packet.Bytes[0]);
+                    var tSent = TimeSpan.FromMilliseconds(Packet.Time);
+                    var time = tSent.ToString("mm\\:ss\\.ffff");
+                    listBox2.Items.Add(index + " " + time + " cmd: " + (PacketCmdS2C)Packet.Bytes[0]);
                     index++;
                 }
                 label5.Text = "Showing " + listBox2.Items.Count + " packets. Total: " + Program.PacketList.Count();

@@ -10,15 +10,17 @@ namespace PcapDecrypt.Packets
     public class Packet
     {
         /*private*/
+        public readonly float Time;
         public readonly byte[] Bytes;
         internal BinaryReader Reader;
         internal List<PacketField> Payload = new List<PacketField>();
         //private Dictionary<PacketCmdS2C, Packets> _packetAnalyzers = new Dictionary<PacketCmdS2C, Packets>();
 
-        public Packet(byte[] Bytes)
+        public Packet(byte[] Bytes, float time)
         {
             Reader = new BinaryReader(new MemoryStream(Bytes));
             this.Bytes = Bytes;
+            this.Time = time;
         }
 
         internal byte readByte(string name)
