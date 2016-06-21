@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
@@ -266,6 +267,26 @@ namespace PcapDecrypt
             var selectedCommand = packetHeaderComboBox.Items[packetHeaderComboBox.SelectedIndex];
             PacketCmdS2C selectedCommandValue = (PacketCmdS2C)Enum.Parse(typeof(PacketCmdS2C), selectedCommand.ToString());
             Program.filter = (byte)selectedCommandValue;
+        }
+
+        private void packetHeaderComboBox_TextUpdate(object sender, EventArgs e)
+        {
+            if (packetHeaderComboBox.Text.StartsWith("0x"))
+            {
+                char[] hex = packetHeaderComboBox.Text.Skip(2).ToArray();
+                string s = "";
+                foreach (var c in hex) {
+                    s += c;
+                }
+                if (s.Length > 0)
+                {
+                    Program.filter = byte.Parse(s, NumberStyles.HexNumber);
+                }
+            }
+            else if (packetHeaderComboBox.Text.Length > 0)
+            {
+                Program.filter = byte.Parse(packetHeaderComboBox.Text);
+            }
         }
     }
 }

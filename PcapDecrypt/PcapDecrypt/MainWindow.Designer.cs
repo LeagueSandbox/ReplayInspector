@@ -218,6 +218,7 @@
             this.packetHeaderComboBox.Sorted = true;
             this.packetHeaderComboBox.TabIndex = 15;
             this.packetHeaderComboBox.SelectedIndexChanged += new System.EventHandler(this.comboBox1_SelectedIndexChanged);
+            this.packetHeaderComboBox.TextUpdate += new System.EventHandler(this.packetHeaderComboBox_TextUpdate);
             // 
             // packetHeaderLabel
             // 
