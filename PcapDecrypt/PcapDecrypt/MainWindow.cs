@@ -27,28 +27,28 @@ namespace PcapDecrypt
             {
                 var tSent = TimeSpan.FromMilliseconds(Packet.Time);
                 var time = tSent.ToString("mm\\:ss\\.ffff");
-                listBox2.Items.Add(index + " " + time + " cmd: " + (PacketCmdS2C)Packet.Bytes[0]);
+                packetListListBox.Items.Add(index + " " + time + " cmd: " + (PacketCmdS2C)Packet.Bytes[0]);
                 index++;
             }
             _originalPacketList = Program.PacketList;
-            label5.Text = "Showing " + listBox2.Items.Count + " packets. Total: " + Program.PacketList.Count();
+            label5.Text = "Showing " + packetListListBox.Items.Count + " packets. Total: " + Program.PacketList.Count();
             label6.Text = "";
             foreach (var PacketCommand in Enum.GetValues(typeof(PacketCmdS2C)))
             {
-                comboBox1.Items.Add(PacketCommand.ToString());
+                packetHeaderComboBox.Items.Add(PacketCommand.ToString());
             }
-            comboBox1.SelectedIndex = 0;
+            packetHeaderComboBox.SelectedIndex = 0;
             Console.WriteLine("GUI loaded");
         }
 
         private unsafe void listBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (Program.PacketList[listBox2.SelectedIndex].Bytes[0] != 255)
+            if (Program.PacketList[packetListListBox.SelectedIndex].Bytes[0] != 255)
             {
-                SelectedPacketSection = listBox1.SelectedIndex;
-                SelectedPacketSectionLength = Program.PacketList[listBox2.SelectedIndex].Payload[listBox1.SelectedIndex].Length;
+                SelectedPacketSection = packetFieldsListBox.SelectedIndex;
+                SelectedPacketSectionLength = Program.PacketList[packetListListBox.SelectedIndex].Payload[packetFieldsListBox.SelectedIndex].Length;
                 //Console.WriteLine("Selected index" + SelectedPacketSection);
-                richTextBox1.Clear();
+                packetHexRichTextBox.Clear();
 
                 /*Console.WriteLine("Length: " + SelectedPacketSectionLength);
                 foreach (var b in Program.PacketList[listBox2.SelectedIndex].Payload[listBox1.SelectedIndex].Bytes)
@@ -57,31 +57,31 @@ namespace PcapDecrypt
                 }
                 Console.WriteLine();*/
 
-                foreach (var PacketField in Program.PacketList[listBox2.SelectedIndex].Payload)
+                foreach (var PacketField in Program.PacketList[packetListListBox.SelectedIndex].Payload)
                 {
-                    int indexOfPacketField = Program.PacketList[listBox2.SelectedIndex].Payload.IndexOf(PacketField);
+                    int indexOfPacketField = Program.PacketList[packetListListBox.SelectedIndex].Payload.IndexOf(PacketField);
                     if (indexOfPacketField == SelectedPacketSection)
                     {
                         foreach (var b in PacketField.Bytes)
                         {
-                            AppendText(richTextBox1, b.ToString("X2") + " ", Color.LightGreen);
+                            AppendText(packetHexRichTextBox, b.ToString("X2") + " ", Color.LightGreen);
                         }
                     }
                     else
                     {
                         foreach (var b in PacketField.Bytes)
                         {
-                            AppendText(richTextBox1, b.ToString("X2") + " ", richTextBox1.BackColor);
+                            AppendText(packetHexRichTextBox, b.ToString("X2") + " ", packetHexRichTextBox.BackColor);
                         }
                     }
                 }
             }
             else
             {
-                SelectedPacketSection = listBox1.SelectedIndex;
-                SelectedPacketSectionLength = Program.BatchPacketList[listBox3.SelectedIndex].Payload[listBox1.SelectedIndex].Length;
+                SelectedPacketSection = packetFieldsListBox.SelectedIndex;
+                SelectedPacketSectionLength = Program.BatchPacketList[batchPacketListListBox.SelectedIndex].Payload[packetFieldsListBox.SelectedIndex].Length;
                 //Console.WriteLine("Selected index" + SelectedPacketSection);
-                richTextBox1.Clear();
+                packetHexRichTextBox.Clear();
 
                 /*Console.WriteLine("Length: " + SelectedPacketSectionLength);
                 foreach (var b in Program.BatchPacketList[listBox3.SelectedIndex].Payload[listBox1.SelectedIndex].Bytes)
@@ -90,21 +90,21 @@ namespace PcapDecrypt
                 }
                 Console.WriteLine();*/
 
-                foreach (var ps in Program.BatchPacketList[listBox3.SelectedIndex].Payload)
+                foreach (var ps in Program.BatchPacketList[batchPacketListListBox.SelectedIndex].Payload)
                 {
-                    int indexofps = Program.BatchPacketList[listBox3.SelectedIndex].Payload.IndexOf(ps);
+                    int indexofps = Program.BatchPacketList[batchPacketListListBox.SelectedIndex].Payload.IndexOf(ps);
                     if (indexofps == SelectedPacketSection)
                     {
                         foreach (var b in ps.Bytes)
                         {
-                            AppendText(richTextBox1, b.ToString("X2") + " ", Color.LightGreen);
+                            AppendText(packetHexRichTextBox, b.ToString("X2") + " ", Color.LightGreen);
                         }
                     }
                     else
                     {
                         foreach (var b in ps.Bytes)
                         {
-                            AppendText(richTextBox1, b.ToString("X2") + " ", richTextBox1.BackColor);
+                            AppendText(packetHexRichTextBox, b.ToString("X2") + " ", packetHexRichTextBox.BackColor);
                         }
                     }
                 }
@@ -114,51 +114,65 @@ namespace PcapDecrypt
         private void listBox2_SelectedIndexChanged(object sender, EventArgs e)
         {
             //Console.WriteLine(listBox2.SelectedIndex);
-            Program.PacketList[listBox2.SelectedIndex] = Program.CreatePacket(Program.PacketList[listBox2.SelectedIndex].Bytes, Program.PacketList[listBox2.SelectedIndex].Time);
-            listBox3.Items.Clear();
+            Program.PacketList[packetListListBox.SelectedIndex] = Program.CreatePacket(Program.PacketList[packetListListBox.SelectedIndex].Bytes, Program.PacketList[packetListListBox.SelectedIndex].Time);
+            batchPacketListListBox.Items.Clear();
             label6.Text = "";
-            listBox1.Items.Clear();
-            richTextBox1.Clear();
-            textBox1.Clear();
-            foreach (var b in Program.PacketList[listBox2.SelectedIndex].Bytes)
+            packetFieldsListBox.Items.Clear();
+            packetHexRichTextBox.Clear();
+            packetASCIITextBox.Clear();
+            foreach (var b in Program.PacketList[packetListListBox.SelectedIndex].Bytes)
             {
-                AppendText(richTextBox1, b.ToString("X2") + " ", richTextBox1.BackColor);
-                textBox1.Text += Encoding.ASCII.GetString(new byte[] { b });
+                AppendText(packetHexRichTextBox, b.ToString("X2") + " ", packetHexRichTextBox.BackColor);
+                if (b >= 0x20 && b <= 0x7E)
+                {
+                    packetASCIITextBox.Text += Encoding.ASCII.GetString(new byte[] { b });
+                }
+                else
+                {
+                    packetASCIITextBox.Text += ".";
+                }
             }
 
-            foreach (var PacketSection in Program.PacketList[listBox2.SelectedIndex].Payload)
+            foreach (var PacketSection in Program.PacketList[packetListListBox.SelectedIndex].Payload)
             {
-                listBox1.Items.Add(PacketSection.Name + ":" + PacketSection.Payload);
+                packetFieldsListBox.Items.Add(PacketSection.Name + ":" + PacketSection.Payload);
             }
 
-            if (Program.PacketList[listBox2.SelectedIndex].Bytes[0] == 0xFF)
+            if (Program.PacketList[packetListListBox.SelectedIndex].Bytes[0] == 0xFF)
             {
-                Program.decodeBatch(Program.PacketList[listBox2.SelectedIndex].Bytes, 0, false);
+                Program.decodeBatch(Program.PacketList[packetListListBox.SelectedIndex].Bytes, 0, false);
                 int index = 0;
                 foreach (var Packet in Program.BatchPacketList)
                 {
-                    listBox3.Items.Add(index + " cmd: " + (PacketCmdS2C)Packet.Bytes[0]);
+                    batchPacketListListBox.Items.Add(index + " cmd: " + (PacketCmdS2C)Packet.Bytes[0]);
                     index++;
                 }
-                label6.Text = "Showing " + listBox3.Items.Count.ToString() + " packets. Total: " + Program.BatchPacketList.Count().ToString();
+                label6.Text = "Showing " + batchPacketListListBox.Items.Count.ToString() + " packets. Total: " + Program.BatchPacketList.Count().ToString();
             }
         }
         private void listBox3_SelectedIndexChanged(object sender, EventArgs e)
         {
-            Program.BatchPacketList[listBox3.SelectedIndex] = Program.CreatePacket(Program.BatchPacketList[listBox3.SelectedIndex].Bytes, Program.BatchPacketList[listBox3.SelectedIndex].Time);
-            listBox1.Items.Clear();
-            richTextBox1.Clear();
-            textBox1.Clear();
+            Program.BatchPacketList[batchPacketListListBox.SelectedIndex] = Program.CreatePacket(Program.BatchPacketList[batchPacketListListBox.SelectedIndex].Bytes, Program.BatchPacketList[batchPacketListListBox.SelectedIndex].Time);
+            packetFieldsListBox.Items.Clear();
+            packetHexRichTextBox.Clear();
+            packetASCIITextBox.Clear();
             //Console.WriteLine(listBox3.SelectedIndex);
-            foreach (var b in Program.BatchPacketList[listBox3.SelectedIndex].Bytes)
+            foreach (var b in Program.BatchPacketList[batchPacketListListBox.SelectedIndex].Bytes)
             {
-                AppendText(richTextBox1, b.ToString("X2") + " ", richTextBox1.BackColor);
-                textBox1.Text += Encoding.ASCII.GetString(new byte[] { b });
+                AppendText(packetHexRichTextBox, b.ToString("X2") + " ", packetHexRichTextBox.BackColor);
+                if (b >= 0x20 && b <= 0x7E)
+                {
+                    packetASCIITextBox.Text += Encoding.ASCII.GetString(new byte[] { b });
+                }
+                else
+                {
+                    packetASCIITextBox.Text += ".";
+                }
             }
 
-            foreach (var PacketSection in Program.BatchPacketList[listBox3.SelectedIndex].Payload)
+            foreach (var PacketSection in Program.BatchPacketList[batchPacketListListBox.SelectedIndex].Payload)
             {
-                listBox1.Items.Add(PacketSection.Name + ":" + PacketSection.Payload);
+                packetFieldsListBox.Items.Add(PacketSection.Name + ":" + PacketSection.Payload);
             }
         }
 
@@ -174,8 +188,8 @@ namespace PcapDecrypt
 
         private void checkBox1_CheckedChanged(object sender, EventArgs e)
         {
-            Program.filtering = checkBox1.Checked;
-            listBox2.Items.Clear();
+            Program.filtering = filterPacketsCheckBox.Checked;
+            packetListListBox.Items.Clear();
             if (Program.filtering)
             {
                 List<Packets.Packet> temp = new List<Packets.Packet>();
@@ -209,10 +223,10 @@ namespace PcapDecrypt
                 {
                     var tSent = TimeSpan.FromMilliseconds(Packet.Time);
                     var time = tSent.ToString("mm\\:ss\\.ffff");
-                    listBox2.Items.Add(index + " " + time + " cmd: " + (PacketCmdS2C)Packet.Bytes[0]);
+                    packetListListBox.Items.Add(index + " " + time + " cmd: " + (PacketCmdS2C)Packet.Bytes[0]);
                     index++;
                 }
-                label5.Text = "Showing " + listBox2.Items.Count + " packets. Total: " + Program.PacketList.Count();
+                label5.Text = "Showing " + packetListListBox.Items.Count + " packets. Total: " + Program.PacketList.Count();
                 label6.Text = "";
             }
             else
@@ -224,17 +238,17 @@ namespace PcapDecrypt
                 {
                     var tSent = TimeSpan.FromMilliseconds(Packet.Time);
                     var time = tSent.ToString("mm\\:ss\\.ffff");
-                    listBox2.Items.Add(index + " " + time + " cmd: " + (PacketCmdS2C)Packet.Bytes[0]);
+                    packetListListBox.Items.Add(index + " " + time + " cmd: " + (PacketCmdS2C)Packet.Bytes[0]);
                     index++;
                 }
-                label5.Text = "Showing " + listBox2.Items.Count + " packets. Total: " + Program.PacketList.Count();
+                label5.Text = "Showing " + packetListListBox.Items.Count + " packets. Total: " + Program.PacketList.Count();
                 label6.Text = "";
             }
         }
 
         private void checkBox2_CheckedChanged(object sender, EventArgs e)
         {
-            Program.filteringSearchInBatch = checkBox2.Checked;
+            Program.filteringSearchInBatch = searchInBatchPacketsCheckBox.Checked;
         }
 
         private void label4_Click(object sender, EventArgs e)
@@ -249,7 +263,7 @@ namespace PcapDecrypt
 
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
-            var selectedCommand = comboBox1.Items[comboBox1.SelectedIndex];
+            var selectedCommand = packetHeaderComboBox.Items[packetHeaderComboBox.SelectedIndex];
             PacketCmdS2C selectedCommandValue = (PacketCmdS2C)Enum.Parse(typeof(PacketCmdS2C), selectedCommand.ToString());
             Program.filter = (byte)selectedCommandValue;
         }

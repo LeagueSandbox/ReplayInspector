@@ -72,96 +72,101 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.listBox1 = new System.Windows.Forms.ListBox();
-            this.listBox2 = new System.Windows.Forms.ListBox();
-            this.richTextBox1 = new System.Windows.Forms.RichTextBox();
-            this.listBox3 = new System.Windows.Forms.ListBox();
-            this.label1 = new System.Windows.Forms.Label();
-            this.label2 = new System.Windows.Forms.Label();
-            this.label3 = new System.Windows.Forms.Label();
-            this.label4 = new System.Windows.Forms.Label();
+            this.packetFieldsListBox = new System.Windows.Forms.ListBox();
+            this.packetListListBox = new System.Windows.Forms.ListBox();
+            this.packetHexRichTextBox = new System.Windows.Forms.RichTextBox();
+            this.batchPacketListListBox = new System.Windows.Forms.ListBox();
+            this.packetListLabel = new System.Windows.Forms.Label();
+            this.batchPacketListLabel = new System.Windows.Forms.Label();
+            this.packetFieldsLabel = new System.Windows.Forms.Label();
+            this.packetHexLabel = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
             this.label6 = new System.Windows.Forms.Label();
-            this.checkBox1 = new System.Windows.Forms.CheckBox();
-            this.checkBox2 = new System.Windows.Forms.CheckBox();
-            this.comboBox1 = new System.Windows.Forms.ComboBox();
-            this.label7 = new System.Windows.Forms.Label();
-            this.label8 = new System.Windows.Forms.Label();
-            this.textBox1 = new System.Windows.Forms.TextBox();
-            this.label9 = new System.Windows.Forms.Label();
+            this.filterPacketsCheckBox = new System.Windows.Forms.CheckBox();
+            this.searchInBatchPacketsCheckBox = new System.Windows.Forms.CheckBox();
+            this.packetHeaderComboBox = new System.Windows.Forms.ComboBox();
+            this.packetHeaderLabel = new System.Windows.Forms.Label();
+            this.packetASCIITextBox = new System.Windows.Forms.TextBox();
+            this.packetASCIILabel = new System.Windows.Forms.Label();
+            this.filteringOptionsGroupBox = new System.Windows.Forms.GroupBox();
+            this.filteringOptionsGroupBox.SuspendLayout();
             this.SuspendLayout();
             // 
-            // listBox1
+            // packetFieldsListBox
             // 
-            this.listBox1.FormattingEnabled = true;
-            this.listBox1.Location = new System.Drawing.Point(692, 353);
-            this.listBox1.Name = "listBox1";
-            this.listBox1.Size = new System.Drawing.Size(324, 303);
-            this.listBox1.TabIndex = 0;
-            this.listBox1.SelectedIndexChanged += new System.EventHandler(this.listBox1_SelectedIndexChanged);
+            this.packetFieldsListBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
+            this.packetFieldsListBox.FormattingEnabled = true;
+            this.packetFieldsListBox.Location = new System.Drawing.Point(643, 327);
+            this.packetFieldsListBox.Name = "packetFieldsListBox";
+            this.packetFieldsListBox.Size = new System.Drawing.Size(373, 355);
+            this.packetFieldsListBox.TabIndex = 0;
+            this.packetFieldsListBox.SelectedIndexChanged += new System.EventHandler(this.listBox1_SelectedIndexChanged);
             // 
-            // listBox2
+            // packetListListBox
             // 
-            this.listBox2.FormattingEnabled = true;
-            this.listBox2.Location = new System.Drawing.Point(12, 25);
-            this.listBox2.Name = "listBox2";
-            this.listBox2.Size = new System.Drawing.Size(332, 303);
-            this.listBox2.TabIndex = 1;
-            this.listBox2.SelectedIndexChanged += new System.EventHandler(this.listBox2_SelectedIndexChanged);
+            this.packetListListBox.FormattingEnabled = true;
+            this.packetListListBox.Location = new System.Drawing.Point(12, 25);
+            this.packetListListBox.Name = "packetListListBox";
+            this.packetListListBox.Size = new System.Drawing.Size(312, 303);
+            this.packetListListBox.TabIndex = 1;
+            this.packetListListBox.SelectedIndexChanged += new System.EventHandler(this.listBox2_SelectedIndexChanged);
             // 
-            // richTextBox1
+            // packetHexRichTextBox
             // 
-            this.richTextBox1.Location = new System.Drawing.Point(692, 25);
-            this.richTextBox1.Name = "richTextBox1";
-            this.richTextBox1.Size = new System.Drawing.Size(324, 162);
-            this.richTextBox1.TabIndex = 4;
-            this.richTextBox1.Text = "";
+            this.packetHexRichTextBox.Location = new System.Drawing.Point(643, 25);
+            this.packetHexRichTextBox.Name = "packetHexRichTextBox";
+            this.packetHexRichTextBox.Size = new System.Drawing.Size(373, 162);
+            this.packetHexRichTextBox.TabIndex = 4;
+            this.packetHexRichTextBox.Text = "";
             // 
-            // listBox3
+            // batchPacketListListBox
             // 
-            this.listBox3.FormattingEnabled = true;
-            this.listBox3.Location = new System.Drawing.Point(12, 405);
-            this.listBox3.Name = "listBox3";
-            this.listBox3.Size = new System.Drawing.Size(332, 251);
-            this.listBox3.TabIndex = 5;
-            this.listBox3.SelectedIndexChanged += new System.EventHandler(this.listBox3_SelectedIndexChanged);
+            this.batchPacketListListBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
+            this.batchPacketListListBox.FormattingEnabled = true;
+            this.batchPacketListListBox.Location = new System.Drawing.Point(12, 405);
+            this.batchPacketListListBox.Name = "batchPacketListListBox";
+            this.batchPacketListListBox.Size = new System.Drawing.Size(312, 264);
+            this.batchPacketListListBox.TabIndex = 5;
+            this.batchPacketListListBox.SelectedIndexChanged += new System.EventHandler(this.listBox3_SelectedIndexChanged);
             // 
-            // label1
+            // packetListLabel
             // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(9, 9);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(59, 13);
-            this.label1.TabIndex = 7;
-            this.label1.Text = "Packet list:";
+            this.packetListLabel.AutoSize = true;
+            this.packetListLabel.Location = new System.Drawing.Point(9, 9);
+            this.packetListLabel.Name = "packetListLabel";
+            this.packetListLabel.Size = new System.Drawing.Size(59, 13);
+            this.packetListLabel.TabIndex = 7;
+            this.packetListLabel.Text = "Packet list:";
             // 
-            // label2
+            // batchPacketListLabel
             // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(9, 389);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(169, 13);
-            this.label2.TabIndex = 8;
-            this.label2.Text = "Packets in selected batch packet:";
+            this.batchPacketListLabel.AutoSize = true;
+            this.batchPacketListLabel.Location = new System.Drawing.Point(9, 389);
+            this.batchPacketListLabel.Name = "batchPacketListLabel";
+            this.batchPacketListLabel.Size = new System.Drawing.Size(169, 13);
+            this.batchPacketListLabel.TabIndex = 8;
+            this.batchPacketListLabel.Text = "Packets in selected batch packet:";
             // 
-            // label3
+            // packetFieldsLabel
             // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(689, 337);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(64, 13);
-            this.label3.TabIndex = 9;
-            this.label3.Text = "Packet info:";
+            this.packetFieldsLabel.AutoSize = true;
+            this.packetFieldsLabel.Location = new System.Drawing.Point(640, 311);
+            this.packetFieldsLabel.Name = "packetFieldsLabel";
+            this.packetFieldsLabel.Size = new System.Drawing.Size(64, 13);
+            this.packetFieldsLabel.TabIndex = 9;
+            this.packetFieldsLabel.Text = "Packet info:";
             // 
-            // label4
+            // packetHexLabel
             // 
-            this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(689, 9);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(44, 13);
-            this.label4.TabIndex = 10;
-            this.label4.Text = "Packet:";
-            this.label4.Click += new System.EventHandler(this.label4_Click);
+            this.packetHexLabel.AutoSize = true;
+            this.packetHexLabel.Location = new System.Drawing.Point(640, 9);
+            this.packetHexLabel.Name = "packetHexLabel";
+            this.packetHexLabel.Size = new System.Drawing.Size(44, 13);
+            this.packetHexLabel.TabIndex = 10;
+            this.packetHexLabel.Text = "Packet:";
+            this.packetHexLabel.Click += new System.EventHandler(this.label4_Click);
             // 
             // label5
             // 
@@ -174,106 +179,110 @@
             // 
             // label6
             // 
+            this.label6.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(12, 659);
+            this.label6.Location = new System.Drawing.Point(12, 671);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(35, 13);
             this.label6.TabIndex = 12;
             this.label6.Text = "label6";
             // 
-            // checkBox1
+            // filterPacketsCheckBox
             // 
-            this.checkBox1.AutoSize = true;
-            this.checkBox1.Location = new System.Drawing.Point(362, 41);
-            this.checkBox1.Name = "checkBox1";
-            this.checkBox1.Size = new System.Drawing.Size(89, 17);
-            this.checkBox1.TabIndex = 13;
-            this.checkBox1.Text = "Filter packets";
-            this.checkBox1.UseVisualStyleBackColor = true;
-            this.checkBox1.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged);
+            this.filterPacketsCheckBox.AutoSize = true;
+            this.filterPacketsCheckBox.Location = new System.Drawing.Point(6, 19);
+            this.filterPacketsCheckBox.Name = "filterPacketsCheckBox";
+            this.filterPacketsCheckBox.Size = new System.Drawing.Size(89, 17);
+            this.filterPacketsCheckBox.TabIndex = 13;
+            this.filterPacketsCheckBox.Text = "Filter packets";
+            this.filterPacketsCheckBox.UseVisualStyleBackColor = true;
+            this.filterPacketsCheckBox.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged);
             // 
-            // checkBox2
+            // searchInBatchPacketsCheckBox
             // 
-            this.checkBox2.AutoSize = true;
-            this.checkBox2.Location = new System.Drawing.Point(362, 64);
-            this.checkBox2.Name = "checkBox2";
-            this.checkBox2.Size = new System.Drawing.Size(142, 17);
-            this.checkBox2.TabIndex = 14;
-            this.checkBox2.Text = "Search in batch packets";
-            this.checkBox2.UseVisualStyleBackColor = true;
-            this.checkBox2.CheckedChanged += new System.EventHandler(this.checkBox2_CheckedChanged);
+            this.searchInBatchPacketsCheckBox.AutoSize = true;
+            this.searchInBatchPacketsCheckBox.Location = new System.Drawing.Point(6, 42);
+            this.searchInBatchPacketsCheckBox.Name = "searchInBatchPacketsCheckBox";
+            this.searchInBatchPacketsCheckBox.Size = new System.Drawing.Size(142, 17);
+            this.searchInBatchPacketsCheckBox.TabIndex = 14;
+            this.searchInBatchPacketsCheckBox.Text = "Search in batch packets";
+            this.searchInBatchPacketsCheckBox.UseVisualStyleBackColor = true;
+            this.searchInBatchPacketsCheckBox.CheckedChanged += new System.EventHandler(this.checkBox2_CheckedChanged);
             // 
-            // comboBox1
+            // packetHeaderComboBox
             // 
-            this.comboBox1.FormattingEnabled = true;
-            this.comboBox1.Location = new System.Drawing.Point(445, 85);
-            this.comboBox1.Name = "comboBox1";
-            this.comboBox1.Size = new System.Drawing.Size(204, 21);
-            this.comboBox1.Sorted = true;
-            this.comboBox1.TabIndex = 15;
-            this.comboBox1.SelectedIndexChanged += new System.EventHandler(this.comboBox1_SelectedIndexChanged);
+            this.packetHeaderComboBox.FormattingEnabled = true;
+            this.packetHeaderComboBox.Location = new System.Drawing.Point(92, 63);
+            this.packetHeaderComboBox.Name = "packetHeaderComboBox";
+            this.packetHeaderComboBox.Size = new System.Drawing.Size(204, 21);
+            this.packetHeaderComboBox.Sorted = true;
+            this.packetHeaderComboBox.TabIndex = 15;
+            this.packetHeaderComboBox.SelectedIndexChanged += new System.EventHandler(this.comboBox1_SelectedIndexChanged);
             // 
-            // label7
+            // packetHeaderLabel
             // 
-            this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(347, 25);
-            this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(83, 13);
-            this.label7.TabIndex = 16;
-            this.label7.Text = "Filtering options:";
+            this.packetHeaderLabel.AutoSize = true;
+            this.packetHeaderLabel.Location = new System.Drawing.Point(6, 66);
+            this.packetHeaderLabel.Name = "packetHeaderLabel";
+            this.packetHeaderLabel.Size = new System.Drawing.Size(80, 13);
+            this.packetHeaderLabel.TabIndex = 17;
+            this.packetHeaderLabel.Text = "Packet header:";
+            this.packetHeaderLabel.Click += new System.EventHandler(this.label8_Click);
             // 
-            // label8
+            // packetASCIITextBox
             // 
-            this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(359, 88);
-            this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(80, 13);
-            this.label8.TabIndex = 17;
-            this.label8.Text = "Packet header:";
-            this.label8.Click += new System.EventHandler(this.label8_Click);
+            this.packetASCIITextBox.Location = new System.Drawing.Point(643, 206);
+            this.packetASCIITextBox.Multiline = true;
+            this.packetASCIITextBox.Name = "packetASCIITextBox";
+            this.packetASCIITextBox.Size = new System.Drawing.Size(373, 102);
+            this.packetASCIITextBox.TabIndex = 18;
             // 
-            // textBox1
+            // packetASCIILabel
             // 
-            this.textBox1.Location = new System.Drawing.Point(692, 206);
-            this.textBox1.Multiline = true;
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(324, 122);
-            this.textBox1.TabIndex = 18;
+            this.packetASCIILabel.AutoSize = true;
+            this.packetASCIILabel.Location = new System.Drawing.Point(640, 190);
+            this.packetASCIILabel.Name = "packetASCIILabel";
+            this.packetASCIILabel.Size = new System.Drawing.Size(37, 13);
+            this.packetASCIILabel.TabIndex = 19;
+            this.packetASCIILabel.Text = "ASCII:";
             // 
-            // label9
+            // filteringOptionsGroupBox
             // 
-            this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(689, 190);
-            this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(37, 13);
-            this.label9.TabIndex = 19;
-            this.label9.Text = "ASCII:";
+            this.filteringOptionsGroupBox.Controls.Add(this.filterPacketsCheckBox);
+            this.filteringOptionsGroupBox.Controls.Add(this.searchInBatchPacketsCheckBox);
+            this.filteringOptionsGroupBox.Controls.Add(this.packetHeaderLabel);
+            this.filteringOptionsGroupBox.Controls.Add(this.packetHeaderComboBox);
+            this.filteringOptionsGroupBox.Location = new System.Drawing.Point(330, 25);
+            this.filteringOptionsGroupBox.Name = "filteringOptionsGroupBox";
+            this.filteringOptionsGroupBox.Size = new System.Drawing.Size(307, 95);
+            this.filteringOptionsGroupBox.TabIndex = 20;
+            this.filteringOptionsGroupBox.TabStop = false;
+            this.filteringOptionsGroupBox.Text = "Filtering options:";
             // 
             // MainWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1028, 693);
-            this.Controls.Add(this.label9);
-            this.Controls.Add(this.textBox1);
-            this.Controls.Add(this.label8);
-            this.Controls.Add(this.label7);
-            this.Controls.Add(this.comboBox1);
-            this.Controls.Add(this.checkBox2);
-            this.Controls.Add(this.checkBox1);
+            this.Controls.Add(this.filteringOptionsGroupBox);
+            this.Controls.Add(this.packetASCIILabel);
+            this.Controls.Add(this.packetASCIITextBox);
             this.Controls.Add(this.label6);
             this.Controls.Add(this.label5);
-            this.Controls.Add(this.label4);
-            this.Controls.Add(this.label3);
-            this.Controls.Add(this.label2);
-            this.Controls.Add(this.label1);
-            this.Controls.Add(this.listBox3);
-            this.Controls.Add(this.richTextBox1);
-            this.Controls.Add(this.listBox2);
-            this.Controls.Add(this.listBox1);
+            this.Controls.Add(this.packetHexLabel);
+            this.Controls.Add(this.packetFieldsLabel);
+            this.Controls.Add(this.batchPacketListLabel);
+            this.Controls.Add(this.packetListLabel);
+            this.Controls.Add(this.batchPacketListListBox);
+            this.Controls.Add(this.packetHexRichTextBox);
+            this.Controls.Add(this.packetListListBox);
+            this.Controls.Add(this.packetFieldsListBox);
             this.Name = "MainWindow";
             this.Text = "Packet analyzer";
+            this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
             this.Load += new System.EventHandler(this.MainWindow_Load);
+            this.filteringOptionsGroupBox.ResumeLayout(false);
+            this.filteringOptionsGroupBox.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -281,22 +290,22 @@
 
         #endregion
 
-        private System.Windows.Forms.ListBox listBox1;
-        private System.Windows.Forms.ListBox listBox2;
-        private System.Windows.Forms.RichTextBox richTextBox1;
-        private System.Windows.Forms.ListBox listBox3;
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.ListBox packetFieldsListBox;
+        private System.Windows.Forms.ListBox packetListListBox;
+        private System.Windows.Forms.RichTextBox packetHexRichTextBox;
+        private System.Windows.Forms.ListBox batchPacketListListBox;
+        private System.Windows.Forms.Label packetListLabel;
+        private System.Windows.Forms.Label batchPacketListLabel;
+        private System.Windows.Forms.Label packetFieldsLabel;
+        private System.Windows.Forms.Label packetHexLabel;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Label label6;
-        private System.Windows.Forms.CheckBox checkBox1;
-        private System.Windows.Forms.CheckBox checkBox2;
-        private System.Windows.Forms.ComboBox comboBox1;
-        private System.Windows.Forms.Label label7;
-        private System.Windows.Forms.Label label8;
-        private System.Windows.Forms.TextBox textBox1;
-        private System.Windows.Forms.Label label9;
+        private System.Windows.Forms.CheckBox filterPacketsCheckBox;
+        private System.Windows.Forms.CheckBox searchInBatchPacketsCheckBox;
+        private System.Windows.Forms.ComboBox packetHeaderComboBox;
+        private System.Windows.Forms.Label packetHeaderLabel;
+        private System.Windows.Forms.TextBox packetASCIITextBox;
+        private System.Windows.Forms.Label packetASCIILabel;
+        private System.Windows.Forms.GroupBox filteringOptionsGroupBox;
     }
 }
