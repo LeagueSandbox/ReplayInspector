@@ -19,6 +19,10 @@ namespace PcapDecrypt
         private static BlowFish* _blowfish;
         private static Dictionary<int, Dictionary<int, byte[]>> fragmentBuffer = new Dictionary<int, Dictionary<int, byte[]>>();
         private static List<string> toWrite = new List<string>();
+        private static List<PacketCmdS2C> knownPackets = new List<PacketCmdS2C>();
+        private static List<PacketCmdS2C> unknownPackets = new List<PacketCmdS2C>();
+        private static List<PacketCmdS2C> unknownPacketsNotInBatch = new List<PacketCmdS2C>();
+
 
         static void Main(string[] args)
         {
@@ -58,6 +62,20 @@ namespace PcapDecrypt
             if (File.Exists("decrypted.txt"))
                 File.Delete("decrypted.txt");
 
+            toWrite.Add(Environment.NewLine);
+            toWrite.Add("Number of known packets: " + knownPackets.Count);
+            toWrite.Add("Number of unknown packets: " + unknownPackets.Count);
+            toWrite.Add("Number of unknown packets not in batch: " + unknownPacketsNotInBatch.Count);
+            toWrite.Add("Unknown packets list:" + Environment.NewLine);
+            foreach (var p in unknownPackets)
+            {
+                toWrite.Add(p.ToString());
+            }
+            toWrite.Add("Unknown packets not in batch list:" + Environment.NewLine);
+            foreach (var p in unknownPacketsNotInBatch)
+            {
+                toWrite.Add(p.ToString());
+            }
             File.AppendAllLines("decrypted.txt", toWrite);
             Console.WriteLine("done");
             Console.ReadLine();
@@ -157,6 +175,20 @@ namespace PcapDecrypt
         {
             var tSent = TimeSpan.FromMilliseconds(time);
             var tt = tSent.ToString("mm\\:ss\\.ffff");
+            if (Enum.IsDefined(typeof(PacketCmdS2C), packet[0]))
+            {
+                if (!knownPackets.Contains((PacketCmdS2C)packet[0]))
+                {
+                    knownPackets.Add((PacketCmdS2C)packet[0]);
+                }
+            }
+            else
+            {
+                if (!unknownPackets.Contains((PacketCmdS2C)packet[0]))
+                {
+                    unknownPackets.Add((PacketCmdS2C)packet[0]);
+                }
+            }
             tt += C2S ? " C2S: " + (PacketCmdS2C)(packet[0]) : " S2C: " + (PacketCmdS2C)(packet[0]);
             tt += " Length:" + packet.Length + Environment.NewLine;
             int i = 0;
@@ -233,6 +265,16 @@ namespace PcapDecrypt
                 }
                 logLine("======================end batch==========================" + Environment.NewLine);
             }
+            else
+            {
+                if (!Enum.IsDefined(typeof(PacketCmdS2C), decrypted[0]))
+                {
+                    if (!unknownPacketsNotInBatch.Contains((PacketCmdS2C)decrypted[0]))
+                    {
+                        unknownPacketsNotInBatch.Add((PacketCmdS2C)decrypted[0]);
+                    }
+                }
+            }
         }
 
         private static void handleFragment(BinaryReader reader, float time, bool C2S)
@@ -275,7 +317,7 @@ namespace PcapDecrypt
         }
 
         //FE [ 00 00 00 00 00 ] 07 ...
-        //0x107 [NET ID] ... 
+        //0x107 [NET ID] ...
         private static void decodeBatch(byte[] decrypted, float time, bool C2S)
         {
             var reader = new BinaryReader(new MemoryStream(decrypted));
