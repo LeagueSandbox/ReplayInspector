@@ -20,8 +20,12 @@ namespace PcapDecrypt
         private static Dictionary<int, Dictionary<int, byte[]>> fragmentBuffer = new Dictionary<int, Dictionary<int, byte[]>>();
         private static List<string> toWrite = new List<string>();
         private static List<PacketCmdS2C> knownPackets = new List<PacketCmdS2C>();
+        private static List<ExtendedPacketCmd> knownExtPackets = new List<ExtendedPacketCmd>();
         private static List<PacketCmdS2C> unknownPackets = new List<PacketCmdS2C>();
+        private static List<ExtendedPacketCmd> unknownExtPackets = new List<ExtendedPacketCmd>();
         private static List<PacketCmdS2C> unknownPacketsNotInBatch = new List<PacketCmdS2C>();
+        private static List<ExtendedPacketCmd> unknownExtPacketsNotInBatch = new List<ExtendedPacketCmd>();
+
 
 
         static void Main(string[] args)
@@ -64,15 +68,28 @@ namespace PcapDecrypt
 
             toWrite.Add(Environment.NewLine);
             toWrite.Add("Number of known packets: " + knownPackets.Count);
+            toWrite.Add("Number of known extended packets: " + knownExtPackets.Count);
             toWrite.Add("Number of unknown packets: " + unknownPackets.Count);
+            toWrite.Add("Number of unknown extended packets: " + unknownExtPackets.Count);
             toWrite.Add("Number of unknown packets not in batch: " + unknownPacketsNotInBatch.Count);
+            toWrite.Add("Number of unknown extended packets not in batch: " + unknownExtPacketsNotInBatch.Count);
             toWrite.Add("Unknown packets list:" + Environment.NewLine);
             foreach (var p in unknownPackets)
             {
                 toWrite.Add(p.ToString());
             }
+            toWrite.Add("Unknown extended packets list:" + Environment.NewLine);
+            foreach (var p in unknownExtPackets)
+            {
+                toWrite.Add(p.ToString());
+            }
             toWrite.Add("Unknown packets not in batch list:" + Environment.NewLine);
             foreach (var p in unknownPacketsNotInBatch)
+            {
+                toWrite.Add(p.ToString());
+            }
+            toWrite.Add("Unknown extended packets not in batch list:" + Environment.NewLine);
+            foreach (var p in unknownExtPacketsNotInBatch)
             {
                 toWrite.Add(p.ToString());
             }
@@ -189,7 +206,29 @@ namespace PcapDecrypt
                     unknownPackets.Add((PacketCmdS2C)packet[0]);
                 }
             }
-            tt += C2S ? " C2S: " + (PacketCmdS2C)(packet[0]) : " S2C: " + (PacketCmdS2C)(packet[0]);
+
+            if (packet[0] == 0xFE)
+            {
+                if (Enum.IsDefined(typeof(ExtendedPacketCmd), packet[5]))
+                {
+                    if (!knownExtPackets.Contains((ExtendedPacketCmd)packet[5]))
+                    {
+                        knownExtPackets.Add((ExtendedPacketCmd)packet[5]);
+                    }
+                }
+                else
+                {
+                    if (!unknownExtPackets.Contains((ExtendedPacketCmd)packet[5]))
+                    {
+                        unknownExtPackets.Add((ExtendedPacketCmd)packet[5]);
+                    }
+                }
+                tt += C2S ? " C2S: " + (PacketCmdS2C)(packet[0]) : " S2C: " + (PacketCmdS2C)(packet[0]) + " : " + (ExtendedPacketCmd)(packet[5]);
+            }
+            else
+            {
+                tt += C2S ? " C2S: " + (PacketCmdS2C)(packet[0]) : " S2C: " + (PacketCmdS2C)(packet[0]);
+            }
             tt += " Length:" + packet.Length + Environment.NewLine;
             int i = 0;
             if (packet.Length > 15)
@@ -264,6 +303,16 @@ namespace PcapDecrypt
                     logLine("Batch parsing threw an exception.");
                 }
                 logLine("======================end batch==========================" + Environment.NewLine);
+            }
+            else if (decrypted[0] == 0xFE)
+            {
+                if (!Enum.IsDefined(typeof(ExtendedPacketCmd), decrypted[5]))
+                {
+                    if (!unknownExtPacketsNotInBatch.Contains((ExtendedPacketCmd)decrypted[5]))
+                    {
+                        unknownExtPacketsNotInBatch.Add((ExtendedPacketCmd)decrypted[5]);
+                    }
+                }
             }
             else
             {
