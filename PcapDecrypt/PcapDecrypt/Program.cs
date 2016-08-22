@@ -429,7 +429,10 @@ namespace PcapDecrypt
                 logLine("Packet " + i + ", Length " + (size + 5));
                 buffer.Add(command);
                 if (newId > 0)
+                {
                     buffer.AddRange(BitConverter.GetBytes(newId).Reverse());
+                    netId = newId;
+                }
                 else
                     buffer.AddRange(BitConverter.GetBytes(netId).Reverse());
                 buffer.AddRange(reader.ReadBytes(size));
