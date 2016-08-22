@@ -399,19 +399,32 @@ namespace PcapDecrypt
                 if ((flagsAndLength & 0x01) > 0)
                 { // additionnal byte, skip command
                     command = opCode;
-                    reader.ReadByte();
+                    if ((flagsAndLength & 0x02) > 0)
+                    {
+                        reader.ReadByte();
+                    }
+                    else
+                    {
+                        newId = reader.ReadUInt32(true);
+                    }
                 }
                 else
                 {
                     command = reader.ReadByte();
                     if ((flagsAndLength & 0x02) > 0)
+                    {
                         reader.ReadByte();
+                    }
                     else
+                    {
                         newId = reader.ReadUInt32(true);
+                    }
                 }
 
                 if (size == 0x3F)
+                {
                     size = reader.ReadByte(); // size is too big to be on 6 bits, so instead it's stored later
+                }
 
                 logLine("Packet " + i + ", Length " + (size + 5));
                 buffer.Add(command);
