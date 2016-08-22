@@ -391,6 +391,7 @@ namespace PcapDecrypt
             {
                 var buffer = new List<byte>();
                 uint newId = 0;
+                bool netIdChanged = false;
                 byte command;
 
                 var flagsAndLength = reader.ReadByte(); // 6 first bits = size (if not 0xFC), 2 last bits = flags
@@ -406,6 +407,7 @@ namespace PcapDecrypt
                     else
                     {
                         newId = reader.ReadUInt32(true);
+                        netIdChanged = true;
                     }
                 }
                 else
@@ -418,6 +420,7 @@ namespace PcapDecrypt
                     else
                     {
                         newId = reader.ReadUInt32(true);
+                        netIdChanged = true;
                     }
                 }
 
@@ -428,13 +431,15 @@ namespace PcapDecrypt
 
                 logLine("Packet " + i + ", Length " + (size + 5));
                 buffer.Add(command);
-                if (newId > 0)
+                if (netIdChanged)
                 {
                     buffer.AddRange(BitConverter.GetBytes(newId).Reverse());
                     netId = newId;
                 }
                 else
+                {
                     buffer.AddRange(BitConverter.GetBytes(netId).Reverse());
+                }
                 buffer.AddRange(reader.ReadBytes(size));
                 printPacket(buffer.ToArray(), time, C2S, false);
 
