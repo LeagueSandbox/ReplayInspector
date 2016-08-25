@@ -60,6 +60,7 @@ namespace PcapDecrypt
         // Packet 0xC0 format is [Net ID 1] [Net ID 2], purpose still unknown
         PKT_S2C_GameTimer = 0xC1,
         PKT_S2C_GameTimerUpdate = 0xC2,
+        PKT_S2C_ChangeCrystalScarNexusHP = 0xD4,
         PKT_S2C_FaceDirection = 0x50,
         PKT_S2C_LeaveVision = 0x51,
         PKT_S2C_SynchVersion = 0x54,
@@ -80,6 +81,7 @@ namespace PcapDecrypt
         PKT_S2C_ShowProjectile = 0x6E,
         PKT_S2C_BuyItemAns = 0x6F,
         PKT_S2C_AddBuff = 0xB7,
+        PKT_S2C_SetCameraPosition = 0x73,
         PKT_S2C_RemoveBuff = 0x7B,
         PKT_S2C_SetCooldown = 0x85,
         PKT_S2C_SpawnParticle = 0x87,
@@ -101,7 +103,7 @@ namespace PcapDecrypt
         PKT_S2C_SetHealth = 0xAE,
         PKT_S2C_SpellAnimation = 0xB0,
         PKT_S2C_EditMessageBoxRight = 0xB1,
-        PKT_S2C_SetTransparentModel = 0xB2, // Not sure if it only does that
+        PKT_S2C_SetModelTransparency = 0xB2, // Not sure if it only does that
         PKT_S2C_BasicTutorialMessageWindow = 0xB3,
         PKT_S2C_RemoveHighlightUnit = 0xB4,
         PKT_S2C_CastSpellAns = 0xB5,
@@ -112,9 +114,11 @@ namespace PcapDecrypt
         PKT_S2C_CharStats = 0xC4,
         PKT_S2C_GameEnd = 0xC6,
         PKT_S2C_Surrender = 0xC9,
+        PKT_S2C_ShowHPAndName = 0xCE,
 
         PKT_S2C_LevelPropSpawn = 0xD0,
         PKT_S2C_DominionPoints = 0xD9,
+        PKT_S2C_SetScreenTint = 0xDB,
         PKT_S2C_DebugMessage = 0xF7,
         PKT_S2C_MessagesAvailable = 0xF9,
         PKT_S2C_Extended = 0xFE,
@@ -164,6 +168,8 @@ namespace PcapDecrypt
         EPKT_S2C_OnAttack = 0x0F,
         EPKT_S2C_ChampionDeathTimer = 0x17,
         EPKT_S2C_ResourceType = 0x19,
+        EPKT_S2C_SpellEmpower = 0x25,
         EPKT_S2C_NPC_Die = 0x26,
+        EPKT_S2C_FloatingText = 0x28
     };
 }
