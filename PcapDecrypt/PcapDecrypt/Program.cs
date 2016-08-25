@@ -19,13 +19,12 @@ namespace PcapDecrypt
         private static BlowFish* _blowfish;
         private static Dictionary<int, Dictionary<int, byte[]>> fragmentBuffer = new Dictionary<int, Dictionary<int, byte[]>>();
         private static List<string> toWrite = new List<string>();
-        private static List<PacketCmdS2C> knownPackets = new List<PacketCmdS2C>();
-        private static List<ExtendedPacketCmd> knownExtPackets = new List<ExtendedPacketCmd>();
-        private static List<PacketCmdS2C> unknownPackets = new List<PacketCmdS2C>();
-        private static List<ExtendedPacketCmd> unknownExtPackets = new List<ExtendedPacketCmd>();
-        private static List<PacketCmdS2C> unknownPacketsNotInBatch = new List<PacketCmdS2C>();
-        private static List<ExtendedPacketCmd> unknownExtPacketsNotInBatch = new List<ExtendedPacketCmd>();
-
+        private static SortedSet<PacketCmdS2C> knownPackets = new SortedSet<PacketCmdS2C>();
+        private static SortedSet<ExtendedPacketCmd> knownExtPackets = new SortedSet<ExtendedPacketCmd>();
+        private static SortedSet<PacketCmdS2C> unknownPackets = new SortedSet<PacketCmdS2C>();
+        private static SortedSet<ExtendedPacketCmd> unknownExtPackets = new SortedSet<ExtendedPacketCmd>();
+        private static SortedSet<PacketCmdS2C> unknownPacketsNotInBatch = new SortedSet<PacketCmdS2C>();
+        private static SortedSet<ExtendedPacketCmd> unknownExtPacketsNotInBatch = new SortedSet<ExtendedPacketCmd>();
 
 
         static void Main(string[] args)
