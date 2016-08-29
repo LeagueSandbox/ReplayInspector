@@ -47,7 +47,7 @@ namespace PcapDecrypt
         PKT_S2C_InhibitorState = 0x2B,
         PKT_S2C_ViewAns = 0x2C,
         PKT_S2C_ChampionRespawn = 0x2F,
-        PKT_S2C_AddUnitFOG = 0x33,
+        PKT_S2C_AddUnitFOW = 0x33,
         PKT_S2C_StopAutoAttack = 0x34,
         PKT_S2C_DeleteObject = 0x35, // not sure what this is, happens when turret leaves vision
         PKT_S2C_MessageBoxTop = 0x36,
@@ -93,6 +93,7 @@ namespace PcapDecrypt
         PKT_S2C_UpdateModel = 0x97,
         PKT_S2C_TurretSpawn = 0x9D,
         PKT_S2C_NPC_Hide = 0x9E, // (4.18) not sure what this became
+        PKT_S2C_SetItemStacks = 0x9F,
         PKT_S2C_MessageBoxRight = 0xA0,
         PKT_S2C_PauseGame = 0xA1,
         PKT_S2C_RemoveMessageBoxTop = 0xA2,
@@ -171,10 +172,12 @@ namespace PcapDecrypt
         EPKT_S2C_SurrenderState = 0x0E,
         EPKT_S2C_OnAttack = 0x0F,
         EPKT_S2C_ChampionDeathTimer = 0x17,
+        EPKT_S2C_SetSpellActiveState = 0x18,
         EPKT_S2C_ResourceType = 0x19,
         EPKT_S2C_SpellEmpower = 0x25,
         EPKT_S2C_NPC_Die = 0x26,
         EPKT_S2C_FloatingText = 0x28,
-        EPKT_S2C_ForceTargetSpell = 0x29
+        EPKT_S2C_ForceTargetSpell = 0x29,
+        EPKT_S2C_MoveChampionCameraCenter = 0x2B
     };
 }
