@@ -136,6 +136,7 @@ namespace PcapDecrypt
         PKT_S2C_CloseGame = 0xE5,
         PKT_S2C_DebugMessage = 0xF7,
         PKT_S2C_MessagesAvailable = 0xF9,
+        PKT_S2C_SetItemStacks2 = 0xFD,
         PKT_S2C_Extended = 0xFE,
         PKT_S2C_Batch = 0xFF
     };
@@ -184,6 +185,7 @@ namespace PcapDecrypt
         EPKT_S2C_SetSpellActiveState = 0x18,
         EPKT_S2C_ResourceType = 0x19,
         EPKT_S2C_ReplaceStoreItem = 0x1C,
+        EPKT_S2C_CreateMonsterCamp = 0x22,
         EPKT_S2C_SpellEmpower = 0x25,
         EPKT_S2C_NPC_Die = 0x26,
         EPKT_S2C_FloatingText = 0x28,
