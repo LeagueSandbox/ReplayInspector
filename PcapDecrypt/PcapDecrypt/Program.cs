@@ -19,12 +19,16 @@ namespace PcapDecrypt
         private static BlowFish* _blowfish;
         private static Dictionary<int, Dictionary<int, byte[]>> fragmentBuffer = new Dictionary<int, Dictionary<int, byte[]>>();
         private static List<string> toWrite = new List<string>();
-        private static SortedSet<PacketCmdS2C> knownPackets = new SortedSet<PacketCmdS2C>();
+        private static SortedSet<PacketCmd> knownPackets = new SortedSet<PacketCmd>();
         private static SortedSet<ExtendedPacketCmd> knownExtPackets = new SortedSet<ExtendedPacketCmd>();
-        private static SortedSet<PacketCmdS2C> unknownPackets = new SortedSet<PacketCmdS2C>();
+        private static SortedSet<PacketCmd> unknownPackets = new SortedSet<PacketCmd>();
+        private static int[] unknownPacketsCount = new int[256];
         private static SortedSet<ExtendedPacketCmd> unknownExtPackets = new SortedSet<ExtendedPacketCmd>();
-        private static SortedSet<PacketCmdS2C> unknownPacketsNotInBatch = new SortedSet<PacketCmdS2C>();
+        private static int[] unknownExtPacketsCount = new int[256];
+        private static SortedSet<PacketCmd> unknownPacketsNotInBatch = new SortedSet<PacketCmd>();
+        private static int[] unknownPacketsNotInBatchCount = new int[256];
         private static SortedSet<ExtendedPacketCmd> unknownExtPacketsNotInBatch = new SortedSet<ExtendedPacketCmd>();
+        private static int[] unknownExtPacketsNotInBatchCount = new int[256];
 
 
         static void Main(string[] args)
@@ -75,22 +79,22 @@ namespace PcapDecrypt
             toWrite.Add("Unknown packets list:" + Environment.NewLine);
             foreach (var p in unknownPackets)
             {
-                toWrite.Add(p.ToString());
+                toWrite.Add(p.ToString() + " (Count: " + unknownPacketsCount[(byte)p] + ")");
             }
             toWrite.Add("Unknown extended packets list:" + Environment.NewLine);
             foreach (var p in unknownExtPackets)
             {
-                toWrite.Add(p.ToString());
+                toWrite.Add(p.ToString() + " (Count: " + unknownExtPacketsCount[(byte)p] + ")");
             }
             toWrite.Add("Unknown packets not in batch list:" + Environment.NewLine);
             foreach (var p in unknownPacketsNotInBatch)
             {
-                toWrite.Add(p.ToString());
+                toWrite.Add(p.ToString() + " (Count: " + unknownPacketsNotInBatchCount[(byte)p] + ")");
             }
             toWrite.Add("Unknown extended packets not in batch list:" + Environment.NewLine);
             foreach (var p in unknownExtPacketsNotInBatch)
             {
-                toWrite.Add(p.ToString());
+                toWrite.Add(p.ToString() + " (Count: " + unknownExtPacketsNotInBatchCount[(byte)p] + ")");
             }
             File.AppendAllLines("decrypted.txt", toWrite);
             Console.WriteLine("done");
@@ -155,7 +159,8 @@ namespace PcapDecrypt
             reader.ReadBytes(8); // Enet protocol header
 
             var opCode = (EnetOpCodes)(reader.ReadByte() & 0x0F); // Enet opcode
-            reader.ReadBytes(3); //Rest of enet command header
+            var channel = reader.ReadByte();
+            reader.ReadBytes(2); //Rest of enet command header
             switch (opCode)
             {
                 case EnetOpCodes.NONE:
@@ -167,14 +172,14 @@ namespace PcapDecrypt
                 case EnetOpCodes.THROTTLE_CONFIGURE:
                     return;
                 case EnetOpCodes.SEND_RELIABLE:
-                    handleReliable(reader, e.Packet.Timeval.Miliseconds, sourcePort > destPort);
+                    handleReliable(reader, e.Packet.Timeval.Miliseconds, sourcePort > destPort, channel);
                     return;
                 case EnetOpCodes.SEND_FRAGMENT:
-                    handleFragment(reader, e.Packet.Timeval.Miliseconds, sourcePort > destPort);
+                    handleFragment(reader, e.Packet.Timeval.Miliseconds, sourcePort > destPort, channel);
                     return;
             }
             logLine("Unknown enet command " + opCode + " " + BitConverter.ToString(new byte[] { (byte)opCode }));
-            printPacket(e.Packet.Data, e.Packet.Timeval.Miliseconds, sourcePort > destPort);
+            printPacket(e.Packet.Data, e.Packet.Timeval.Miliseconds, sourcePort > destPort, channel);
         }
 
         private static byte[] decrypt(byte[] packet)
@@ -187,23 +192,24 @@ namespace PcapDecrypt
             return temp;
         }
 
-        private static void printPacket(byte[] packet, float time, bool C2S, bool addSeparator = true)
+        private static void printPacket(byte[] packet, float time, bool C2S, byte channel, bool addSeparator = true)
         {
             var tSent = TimeSpan.FromMilliseconds(time);
             var tt = tSent.ToString("mm\\:ss\\.ffff");
-            if (Enum.IsDefined(typeof(PacketCmdS2C), packet[0]))
+            if (Enum.IsDefined(typeof(PacketCmd), packet[0]))
             {
-                if (!knownPackets.Contains((PacketCmdS2C)packet[0]))
+                if (!knownPackets.Contains((PacketCmd)packet[0]))
                 {
-                    knownPackets.Add((PacketCmdS2C)packet[0]);
+                    knownPackets.Add((PacketCmd)packet[0]);
                 }
             }
             else
             {
-                if (!unknownPackets.Contains((PacketCmdS2C)packet[0]))
+                if (!unknownPackets.Contains((PacketCmd)packet[0]))
                 {
-                    unknownPackets.Add((PacketCmdS2C)packet[0]);
+                    unknownPackets.Add((PacketCmd)packet[0]);
                 }
+                unknownPacketsCount[packet[0]]++;
             }
 
             if (packet[0] == 0xFE)
@@ -221,14 +227,15 @@ namespace PcapDecrypt
                     {
                         unknownExtPackets.Add((ExtendedPacketCmd)packet[5]);
                     }
+                    unknownExtPacketsCount[packet[5]]++;
                 }
-                tt += C2S ? " C2S: " + (PacketCmdS2C)(packet[0]) : " S2C: " + (PacketCmdS2C)(packet[0]) + " : " + (ExtendedPacketCmd)(packet[5]);
+                tt += C2S ? " C2S: " + (PacketCmd)(packet[0]) : " S2C: " + (PacketCmd)(packet[0]) + " : " + (ExtendedPacketCmd)(packet[5]);
             }
             else
             {
-                tt += C2S ? " C2S: " + (PacketCmdS2C)(packet[0]) : " S2C: " + (PacketCmdS2C)(packet[0]);
+                tt += C2S ? " C2S: " + (PacketCmd)(packet[0]) : " S2C: " + (PacketCmd)(packet[0]);
             }
-            tt += " Length:" + packet.Length + Environment.NewLine;
+            tt += " Length:" + packet.Length + " Channel: " + (Channel)channel + Environment.NewLine;
             int i = 0;
             if (packet.Length > 15)
             {
@@ -277,7 +284,7 @@ namespace PcapDecrypt
 
         }
 
-        private static void handleReliable(BinaryReader reader, float time, bool C2S)
+        private static void handleReliable(BinaryReader reader, float time, bool C2S, byte channel)
         {
             var len = reader.ReadUInt16(true);
             //if (reader.BaseStream.Length - reader.BaseStream.Position < len)
@@ -288,14 +295,14 @@ namespace PcapDecrypt
                 return;
 
             var decrypted = decrypt(packet);
-            printPacket(decrypted, time, C2S, false);
+            printPacket(decrypted, time, C2S, channel, false);
 
             if (decrypted[0] == 0xFF)
             {
                 logLine(Environment.NewLine + "===Printing batch===");
                 try
                 {
-                    decodeBatch(decrypted, time, C2S);
+                    decodeBatch(decrypted, time, C2S, channel);
                 }
                 catch
                 {
@@ -311,21 +318,23 @@ namespace PcapDecrypt
                     {
                         unknownExtPacketsNotInBatch.Add((ExtendedPacketCmd)decrypted[5]);
                     }
+                    unknownExtPacketsNotInBatchCount[decrypted[5]]++;
                 }
             }
             else
             {
-                if (!Enum.IsDefined(typeof(PacketCmdS2C), decrypted[0]))
+                if (!Enum.IsDefined(typeof(PacketCmd), decrypted[0]))
                 {
-                    if (!unknownPacketsNotInBatch.Contains((PacketCmdS2C)decrypted[0]))
+                    if (!unknownPacketsNotInBatch.Contains((PacketCmd)decrypted[0]))
                     {
-                        unknownPacketsNotInBatch.Add((PacketCmdS2C)decrypted[0]);
+                        unknownPacketsNotInBatch.Add((PacketCmd)decrypted[0]);
                     }
+                    unknownPacketsNotInBatchCount[decrypted[0]]++;
                 }
             }
         }
 
-        private static void handleFragment(BinaryReader reader, float time, bool C2S)
+        private static void handleFragment(BinaryReader reader, float time, bool C2S, byte channel)
         {
             var fragmentGroup = reader.ReadUInt16(); // Fragment start number
             var len = reader.ReadUInt16(true);
@@ -359,14 +368,14 @@ namespace PcapDecrypt
                     return;// logLine("Fragment's fishy. " + totalLen + "!=" + packet.Count);
 
                 var decrypted = decrypt(packet.ToArray());
-                printPacket(decrypted, time, C2S);
+                printPacket(decrypted, time, C2S, channel);
                 fragmentBuffer.Remove(fragmentGroup);
             }
         }
 
         //FE [ 00 00 00 00 00 ] 07 ...
         //0x107 [NET ID] ...
-        private static void decodeBatch(byte[] decrypted, float time, bool C2S)
+        private static void decodeBatch(byte[] decrypted, float time, bool C2S, byte channel)
         {
             var reader = new BinaryReader(new MemoryStream(decrypted));
             reader.ReadByte();
@@ -374,23 +383,22 @@ namespace PcapDecrypt
             var packetCount = reader.ReadByte();
             var size = reader.ReadByte();
             var opCode = reader.ReadByte();
-            var netId = reader.ReadUInt32(true);
+            var firstNetId = reader.ReadUInt32(true);
             var firstPacket = new List<byte>();
 
             firstPacket.Add(opCode);
-            firstPacket.AddRange(BitConverter.GetBytes(netId).Reverse());
+            firstPacket.AddRange(BitConverter.GetBytes(firstNetId).Reverse());
 
             if (size > 5)
                 firstPacket.AddRange(reader.ReadBytes(size - 5));
 
             logLine("Packet 1, Length " + size);
-            printPacket(firstPacket.ToArray(), time, C2S, false);
+            printPacket(firstPacket.ToArray(), time, C2S, channel, false);
 
             for (int i = 2; i < packetCount + 1; i++)
             {
                 var buffer = new List<byte>();
                 uint newId = 0;
-                bool netIdChanged = false;
                 byte command;
 
                 var flagsAndLength = reader.ReadByte(); // 6 first bits = size (if not 0xFC), 2 last bits = flags
@@ -401,12 +409,13 @@ namespace PcapDecrypt
                     command = opCode;
                     if ((flagsAndLength & 0x02) > 0)
                     {
-                        reader.ReadByte();
+                        var netIdDifference = reader.ReadByte();
+                        var netId = BitConverter.ToUInt32(BitConverter.GetBytes(firstNetId).Reverse().ToArray(), 0);
+                        newId = netId + netIdDifference;
                     }
                     else
                     {
                         newId = reader.ReadUInt32(true);
-                        netIdChanged = true;
                     }
                 }
                 else
@@ -414,12 +423,13 @@ namespace PcapDecrypt
                     command = reader.ReadByte();
                     if ((flagsAndLength & 0x02) > 0)
                     {
-                        reader.ReadByte();
+                        var netIdDifference = reader.ReadByte();
+                        var netId = BitConverter.ToUInt32(BitConverter.GetBytes(firstNetId).Reverse().ToArray(), 0);
+                        newId = netId + netIdDifference;
                     }
                     else
                     {
                         newId = reader.ReadUInt32(true);
-                        netIdChanged = true;
                     }
                 }
 
@@ -430,17 +440,9 @@ namespace PcapDecrypt
 
                 logLine("Packet " + i + ", Length " + (size + 5));
                 buffer.Add(command);
-                if (netIdChanged)
-                {
-                    buffer.AddRange(BitConverter.GetBytes(newId).Reverse());
-                    netId = newId;
-                }
-                else
-                {
-                    buffer.AddRange(BitConverter.GetBytes(netId).Reverse());
-                }
+                buffer.AddRange(BitConverter.GetBytes(newId));
                 buffer.AddRange(reader.ReadBytes(size));
-                printPacket(buffer.ToArray(), time, C2S, false);
+                printPacket(buffer.ToArray(), time, C2S, channel, false);
 
                 opCode = command;
             }
