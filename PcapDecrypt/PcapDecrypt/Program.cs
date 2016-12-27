@@ -29,7 +29,8 @@ namespace PcapDecrypt
         private static int[] unknownPacketsNotInBatchCount = new int[256];
         private static SortedSet<ExtendedPacketCmd> unknownExtPacketsNotInBatch = new SortedSet<ExtendedPacketCmd>();
         private static int[] unknownExtPacketsNotInBatchCount = new int[256];
-
+        private static float lastPacketTime;
+        private static bool firstPacketReceived;
 
         static void Main(string[] args)
         {
@@ -235,7 +236,18 @@ namespace PcapDecrypt
             {
                 tt += C2S ? " C2S: " + (PacketCmd)(packet[0]) : " S2C: " + (PacketCmd)(packet[0]);
             }
-            tt += " Length:" + packet.Length + " Channel: " + (Channel)channel + Environment.NewLine;
+            tt += " Length:" + packet.Length + " Channel: " + (Channel)channel;
+            if (!firstPacketReceived)
+            {
+                lastPacketTime = time;
+                firstPacketReceived = true;
+                tt += Environment.NewLine;
+            }
+            else
+            {
+                tt += " Time since last packet: " + (time - lastPacketTime) + "ms" + Environment.NewLine;
+                lastPacketTime = time;
+            }
             int i = 0;
             if (packet.Length > 15)
             {
@@ -277,7 +289,7 @@ namespace PcapDecrypt
                         tt += ".";
                 }
             }
-            logLine(tt + Environment.NewLine);
+            logLine(tt);
 
             if (addSeparator)
                 logLine("----------------------------------------------------------------------------");
