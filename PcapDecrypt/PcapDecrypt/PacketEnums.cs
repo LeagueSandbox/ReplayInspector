@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace PcapDecrypt
+﻿namespace PcapDecrypt
 {
     public enum EnetOpCodes : byte
     {
@@ -40,7 +34,7 @@ namespace PcapDecrypt
         PKT_S2C_RestrictCameraMovement = 0x06,
         PKT_C2S_HeartBeat = 0x08,
         PKT_C2S_SellItem = 0x09,
-        PKT_S2C_UnpauseGame = 0x0A,
+        PKT_UnpauseGame = 0x0A,
         PKT_S2C_RemoveItem = 0x0B,
         PKT_S2C_NextAutoAttack = 0x0C,
         PKT_S2C_EditMessageBoxTop = 0x0D,
@@ -97,14 +91,11 @@ namespace PcapDecrypt
         PKT_S2C_ChampionDie = 0x5E,
         PKT_S2C_MoveAns = 0x61,
         PKT_S2C_StartSpawn = 0x62,
-        PKT_S2C_Dash = 0x64,
-        PKT_C2S_ClientReady = 0x64,
-        PKT_S2C_DamageDone = 0x65,
-        PKT_S2C_LoadHero = 0x65,
-        PKT_S2C_LoadName = 0x66,
+        PKT_S2C_Dash = 0x64, PKT_C2S_ClientReady = 0x64,
+        PKT_S2C_DamageDone = 0x65, PKT_S2C_LoadHero = 0x65,
+        PKT_S2C_LoadName = 0x66, PKT_S2C_ModifyShield = 0x66,
         PKT_S2C_LoadScreenInfo = 0x67,
-        PKT_S2C_ChatBoxMessage = 0x68,
-        PKT_C2S_ChatBoxMessage = 0x68,
+        PKT_ChatBoxMessage = 0x68,
         PKT_S2C_SetTarget = 0x6A,
         PKT_S2C_SetAnimation = 0x6B,
         PKT_C2S_BlueTipClicked = 0x6D,
@@ -136,8 +127,7 @@ namespace PcapDecrypt
         PKT_S2C_NPC_Hide = 0x9E, // (4.18) not sure what this became
         PKT_S2C_SetItemStacks = 0x9F,
         PKT_S2C_MessageBoxRight = 0xA0,
-        PKT_S2C_PauseGame = 0xA1, // <-- PKT_Pause ?
-        PKT_C2S_PauseReq = 0xA1,  // <--
+        PKT_PauseGame = 0xA1, // <-- PKT_Pause ?
         PKT_S2C_RemoveMessageBoxTop = 0xA2,
         PKT_S2C_Announce2 = 0xA3, // ? idk
         PKT_C2S_Surrender = 0xA4,
