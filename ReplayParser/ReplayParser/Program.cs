@@ -22,7 +22,6 @@ namespace ReplayParser
                 return;
             if (file.spectatorMode) 
                 SpectatorResponse.initBlowfish(SpectatorResponse.getDecryptionKey(file.encryptionKey,file.matchID.ToString()));
-                //SpectatorResponse.initBlowfish(file.encryptionKey);
 
             var reader = new PacketReader(file.GetReplayStream(),file.spectatorMode);
             if (!reader.loaded)
