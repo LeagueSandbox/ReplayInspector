@@ -11,16 +11,17 @@ namespace ReplayParser
     public class PacketReader
     {
         private List<Packet> PacketBuffer = new List<Packet>();
+        private List<SpectatorPacket> specPackets = new List<SpectatorPacket>();
         private long ReadLength;
         private BinaryReader replayFile;
         public bool loaded;
 
-        public PacketReader(ReplayStream reader)
+        public PacketReader(ReplayStream reader, bool spectator)
         {
-            loaded = Load(reader);
+            loaded = Load(reader, spectator);
         }
 
-        public bool Load(ReplayStream reader)
+        public bool Load(ReplayStream reader, bool spectator)
         {
             if (reader == null)
                 return false;
@@ -34,8 +35,17 @@ namespace ReplayParser
                 {
                     var file = replayFile;
                     var packet = new Packet(file);
-                    lock (PacketBuffer)
-                        PacketBuffer.Add(packet);
+                    if (spectator)
+                    {
+                        SpectatorResponse response = new SpectatorResponse(packet.Bytes);
+                        lock (specPackets)
+                            specPackets.AddRange(response.GetPackets());
+                    }
+                    else
+                    {
+                        lock (PacketBuffer)
+                            PacketBuffer.Add(packet);
+                    }
                 }
             }
             catch { }
@@ -58,6 +68,10 @@ namespace ReplayParser
         public List<Packet> getPackets()
         {
             return PacketBuffer;
+        }
+        public List<SpectatorPacket> getSpectatorPackets()
+        {
+            return specPackets;
         }
     }
 }

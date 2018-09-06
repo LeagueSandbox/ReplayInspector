@@ -20,12 +20,16 @@ namespace ReplayParser
 
             if (file == null)
                 return;
+            if (file.spectatorMode) 
+                SpectatorResponse.initBlowfish(SpectatorResponse.getDecryptionKey(file.encryptionKey,file.matchID.ToString()));
 
-            var reader = new PacketReader(file.GetReplayStream());
+            var reader = new PacketReader(file.GetReplayStream(),file.spectatorMode);
             if (!reader.loaded)
                 return;
-
-            new PacketWriter(reader.getPackets(), file).writeJson(args[0]);
+            if (file.spectatorMode)
+                new SpectatorPacketWriter(reader.getSpectatorPackets()).write(args[0]);
+            else
+                new PacketWriter(reader.getPackets(), file).writeJson(args[0]);
         }
     }
 }
